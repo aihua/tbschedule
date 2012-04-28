@@ -30,7 +30,7 @@ table{border-collapse:collapse}
 		<%}%>
      	<th>任务类型</th>
      	<th>单JVM最大线程组数量</th>
-    	<th>需要启动的总线程组数量</th>
+    	<th>最大线程组数量</th>
      	<th>IP地址(逗号分隔)</th>
      </tr>
 <%
