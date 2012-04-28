@@ -62,7 +62,8 @@ public class InitialDemoConfigData extends UnitilsJUnit4 {
 		}
 		ScheduleStrategy strategy = new ScheduleStrategy();
 		strategy.setTaskType(taskName);
-		strategy.setAssignNum(3);
+		strategy.setNumOfSingleServer(1);
+		strategy.setAssignNum(10);
 		strategy.setIPList("127.0.0.1".split(","));
 		this.scheduleManagerFactory.getScheduleStrategyManager()
 				.createScheduleStrategy(strategy);
