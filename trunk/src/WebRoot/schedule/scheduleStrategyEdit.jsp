@@ -54,7 +54,7 @@ TD{font-size:12px;}
 	<td>单JVM最大线程组数量，如果是0，则表示没有限制.每台机器运行的线程组数量 =总量/机器数 </td>
 </tr>
 <tr>
-	<td>需要启动的总线程组数量：</td>
+	<td>最大线程组数量：</td>
 	<td><input type="text" name="assignNum" value="<%=scheduleStrategy.getAssignNum()%>"  width="30"></td>
 	<td>所有服务器总共运行的最大数量</td>
 </tr>
