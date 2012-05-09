@@ -115,13 +115,6 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			this.zkManager.initial();
 			this.scheduleDataManager = new ScheduleDataManager4ZK(this.zkManager);
 			this.scheduleStrategyManager  = new ScheduleStrategyDataManager4ZK(this.zkManager);
-			String name = "pamirs:name=schedule.ScheduleManangerFactory." + this.hashCode();
-			if (MBeanManagerFactory.isRegistered(name) == false) {
-				MBeanManagerFactory.registerMBean(
-						new TBScheduleManagerFactoryMBean(this), name);
-			}else{
-				logger.warn("重复注册com.taobao.pamirs.schedule.TBScheduleManagerFactory");
-			}
 			if (this.start == true) {
 				// 注册调度管理器
 				this.scheduleStrategyManager.registerManagerFactory(this);
@@ -146,8 +139,6 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		}
 		this.lock.lock();
 		try{
-			int managerPort = MBeanManagerFactory.getHtmlAdaptorPort();
-			String jmxUrl = MBeanManagerFactory.getManangerUrl();
 			//清除已经过期1天的TASK,OWN_SIGN的组合。超过一天没有活动server的视为过期
 			ScheduleTaskType baseTaskTypeInfo = scheduleDataManager.loadTaskTypeBaseInfo(baseTaskType);
 		
@@ -177,9 +168,8 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			if (dealBean instanceof IScheduleTaskDeal == false) {
 				throw new Exception( "SpringBean " + baseTaskTypeInfo.getDealBeanName() + " 没有实现 IScheduleTaskDeal接口");
 			}
-			TBScheduleManager result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,managerPort, jmxUrl, scheduleDataManager,
+			TBScheduleManager result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,scheduleDataManager,
 				(IScheduleTaskDeal<?>)dealBean);
-			MBeanManagerFactory.registerMBean(new TBScheduleManagerMBean(result), result.getmBeanName());
 			String key = TBScheduleManager.getTaskTypeByBaseAndOwnSign(baseTaskType, ownSign) +"$"+result.hashCode();
 			managerMap.put(key, result);
 			this.baseTaskList.put(baseTaskType,baseTaskType);
@@ -192,9 +182,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 
 	public void unregister(TBScheduleManager manager) throws Exception{
 		String key = manager.getScheduleServer().getTaskType()+"$"+ manager.hashCode();
-		if(managerMap.remove(key)!= null){		
-			MBeanManagerFactory.unregisterMBean(manager.getmBeanName());
-		}
+		managerMap.remove(key);
 	}
 
 

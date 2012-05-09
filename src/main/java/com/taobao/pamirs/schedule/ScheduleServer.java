@@ -38,12 +38,6 @@ public class ScheduleServer {
 	private String hostName;
 
 	/**
-	 * 调度服务器远程控制端口
-	 */
-	int managerPort;
-
-	String jmxUrl;
-	/**
 	 * 数据处理线程数量
 	 */
 	private int threadNum;
@@ -87,7 +81,7 @@ public class ScheduleServer {
 	}
 
 	public static ScheduleServer createScheduleServer(String aBaseTaskType,
-			String aOwnSign, int aThreadNum, int aManagerPort, String aJmxUrl)
+			String aOwnSign, int aThreadNum)
 			throws Exception {
 		ScheduleServer result = new ScheduleServer();
 		result.baseTaskType = aBaseTaskType;
@@ -96,13 +90,11 @@ public class ScheduleServer {
 				aBaseTaskType, aOwnSign);
 		result.ip = ScheduleUtil.getLocalIP();
 		result.hostName = ScheduleUtil.getLocalHostName();
-		result.managerPort = aManagerPort;
 		result.registerTime = new Timestamp(ScheduleUtil.getCurrentTimeMillis());
 		result.threadNum = aThreadNum;
 		result.heartBeatTime = null;
 		result.dealInfoDesc = "调度初始化";
 		result.version = 0;
-		result.jmxUrl = aJmxUrl;
 		result.uuid = result.ip
 				+ "$"
 				+ (UUID.randomUUID().toString().replaceAll("-", "")
@@ -195,13 +187,6 @@ public class ScheduleServer {
 		this.hostName = hostName;
 	}
 
-	public int getManagerPort() {
-		return managerPort;
-	}
-
-	public void setManagerPort(int managerPort) {
-		this.managerPort = managerPort;
-	}
 
 	public Timestamp getCenterServerTime() {
 		return centerServerTime;
@@ -209,14 +194,6 @@ public class ScheduleServer {
 
 	public void setCenterServerTime(Timestamp centerServerTime) {
 		this.centerServerTime = centerServerTime;
-	}
-
-	public String getJmxUrl() {
-		return jmxUrl;
-	}
-
-	public void setJmxUrl(String jmxUrl) {
-		this.jmxUrl = jmxUrl;
 	}
 
 	public String getNextRunStartTime() {

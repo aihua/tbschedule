@@ -12,8 +12,7 @@ public class TBScheduleManagerDynamic extends TBScheduleManager {
 			String baseTaskType, String ownSign, int managerPort,
 			String jxmUrl, IScheduleDataManager aScheduleCenter,
 			IScheduleTaskDeal<?> aTaskDealBean) throws Exception {
-		super(aFactory, baseTaskType, ownSign, managerPort, jxmUrl, aScheduleCenter,
-				aTaskDealBean);
+		super(aFactory, baseTaskType, ownSign,aScheduleCenter,aTaskDealBean);
 	}
 	public void initial() throws Exception{
 		if (scheduleCenter.isLeader(this.currenScheduleServer.getUuid(),

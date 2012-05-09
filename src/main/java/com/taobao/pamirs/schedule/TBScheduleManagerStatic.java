@@ -16,10 +16,9 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
     protected long lastFetchVersion = -1;
 
 	TBScheduleManagerStatic(TBScheduleManagerFactory aFactory,
-			String baseTaskType, String ownSign, int managerPort,
-			String jxmUrl, IScheduleDataManager aScheduleCenter,
+			String baseTaskType, String ownSign,IScheduleDataManager aScheduleCenter,
 			IScheduleTaskDeal<?> aTaskDealBean) throws Exception {
-		super(aFactory, baseTaskType, ownSign, managerPort, jxmUrl, aScheduleCenter,
+		super(aFactory, baseTaskType, ownSign, aScheduleCenter,
 				aTaskDealBean);
 	}
 	public void initialRunningInfo() throws Exception{

@@ -95,7 +95,7 @@ public abstract class TBScheduleManager {
     protected boolean isRuntimeInfoInitial = false;
     
     TBScheduleManagerFactory factory;
-	TBScheduleManager(TBScheduleManagerFactory aFactory,String baseTaskType,String ownSign,int managerPort,String jxmUrl,IScheduleDataManager aScheduleCenter,IScheduleTaskDeal aTaskDealBean) throws Exception{
+	TBScheduleManager(TBScheduleManagerFactory aFactory,String baseTaskType,String ownSign ,IScheduleDataManager aScheduleCenter,IScheduleTaskDeal aTaskDealBean) throws Exception{
 		if(aTaskDealBean == null){
 			throw new Exception("没有为任务：" + baseTaskType + "指定处理器 taskDealBean == null " );
 		}
@@ -110,7 +110,7 @@ public abstract class TBScheduleManager {
     				+ this.taskTypeInfo.getJudgeDeadInterval() 
     				+ ",HeartBeatRate = " + this.taskTypeInfo.getHeartBeatRate());
     	}
-    	this.currenScheduleServer = ScheduleServer.createScheduleServer(baseTaskType,ownSign,this.taskTypeInfo.getThreadNumber(),managerPort,jxmUrl);
+    	this.currenScheduleServer = ScheduleServer.createScheduleServer(baseTaskType,ownSign,this.taskTypeInfo.getThreadNumber());
     	this.currenScheduleServer.setManagerFactoryUUID(this.factory.getUuid());
     	scheduleCenter.registerScheduleServer(this.currenScheduleServer);
     	this.mBeanName = "pamirs:name=" + "schedule.ServerMananger." +this.currenScheduleServer.getUuid();
