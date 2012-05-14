@@ -7,9 +7,9 @@ import org.unitils.UnitilsJUnit4;
 import org.unitils.spring.annotation.SpringApplicationContext;
 import org.unitils.spring.annotation.SpringBeanByName;
 
-import com.taobao.pamirs.schedule.ScheduleStrategy;
-import com.taobao.pamirs.schedule.ScheduleTaskType;
-import com.taobao.pamirs.schedule.TBScheduleManagerFactory;
+import com.taobao.pamirs.schedule.strategy.ScheduleStrategy;
+import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
+import com.taobao.pamirs.schedule.taskmanager.ScheduleTaskType;
 
 @SpringApplicationContext({ "schedule.xml" })
 public class InitialDemoConfigData extends UnitilsJUnit4 {
@@ -54,14 +54,19 @@ public class InitialDemoConfigData extends UnitilsJUnit4 {
 
 		// 创建任务DemoTask的调度策略
 		String taskName = baseTaskTypeName;
+		String strategyName =taskName +"-Strategy";
 		try {
 			this.scheduleManagerFactory.getScheduleStrategyManager()
-					.deleteMachineStrategy(taskName,true);
+					.deleteMachineStrategy(strategyName,true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		ScheduleStrategy strategy = new ScheduleStrategy();
-		strategy.setTaskType(taskName);
+		strategy.setStrategyName(strategyName);
+		strategy.setKind(ScheduleStrategy.Kind.Schedule);
+		strategy.setTaskName(taskName);
+		strategy.setTaskParameter("中国");
+		
 		strategy.setNumOfSingleServer(1);
 		strategy.setAssignNum(10);
 		strategy.setIPList("127.0.0.1".split(","));
