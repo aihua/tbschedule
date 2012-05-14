@@ -1,6 +1,5 @@
 <%@page import="java.util.ArrayList"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleStrategyRunntime"%>
-<%@page import="com.taobao.pamirs.schedule.TBScheduleManager"%>
+<%@page import="com.taobao.pamirs.schedule.strategy.ScheduleStrategyRunntime"%>
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=GB2312" %>
@@ -18,7 +17,7 @@ TD{background-color: ;border:#8CB2E3 1px solid;border-width:0 1 1 0;font-size:12
 table{border-collapse:collapse}
 </STYLE>
 <%
- String taskType =request.getParameter("taskType");
+ String strategyName =request.getParameter("strategyName");
  String uuid =request.getParameter("uuid");
 
 %>
@@ -34,8 +33,8 @@ table{border-collapse:collapse}
      </tr>
 <%
 List<ScheduleStrategyRunntime> runntimeList = null;
-if(taskType != null && taskType.trim().length() > 0){
-	runntimeList =ConsoleManager.getScheduleStrategyManager().loadAllScheduleStrategyRunntimeByTaskType(taskType);
+if(strategyName != null && strategyName.trim().length() > 0){
+	runntimeList =ConsoleManager.getScheduleStrategyManager().loadAllScheduleStrategyRunntimeByTaskType(strategyName);
 }else if(uuid != null && uuid.trim().length() > 0){
 	runntimeList =ConsoleManager.getScheduleStrategyManager().loadAllScheduleStrategyRunntimeByUUID(uuid);
 }else{
@@ -47,7 +46,7 @@ for(int i=0;i<runntimeList.size();i++){
 %>
      <tr >
      	<td><%=(i+1)%></td>
-     	<td><%=run.getTaskType()%></td>
+     	<td><%=run.getStrategyName()%></td>
      	<td align="center"><%=run.getUuid()%></td>
      	<td align="center"><%=run.getRequestNum()%></td>
      	<td align="center" style="" ><p style="color:red"><%=run.getMessage()%></p></td>     	

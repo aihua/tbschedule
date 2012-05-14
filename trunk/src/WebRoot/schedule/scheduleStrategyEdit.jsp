@@ -1,5 +1,5 @@
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleStrategy"%>
+<%@page import="com.taobao.pamirs.schedule.strategy.ScheduleStrategy"%>
 <%@ page contentType="text/html; charset=GB2312" %>
 <%
     String isManager= request.getParameter("manager");
@@ -20,7 +20,10 @@
 		editSts="style=\"background-color: blue\" readonly=\"readonly\"";
 	}else{
 		scheduleStrategy = new ScheduleStrategy();
-		scheduleStrategy.setTaskType("请输入新的任务类型...");
+		scheduleStrategy.setStrategyName("请输入新的调度策略名称...");
+		scheduleStrategy.setKind(ScheduleStrategy.Kind.Schedule);
+		scheduleStrategy.setTaskName("请输入调度任务名称...");
+		scheduleStrategy.setTaskParameter("");
 		scheduleStrategy.setNumOfSingleServer(0);
 		scheduleStrategy.setAssignNum(2);
 		ips = "127.0.0.1";
@@ -44,10 +47,26 @@ TD{font-size:12px;}
 <input type="hidden" name="action" value="<%=actionName%>"/>
 <table>
 <tr>
-	<td>任务名称:</td>
-	<td><input type="text" id="taskType" name="taskType"  <%=editSts%> value="<%=scheduleStrategy.getTaskType()%>" width="30"></td>
-	<td>格式：任务名称$域名称</td>
+	<td>策略名称:</td>
+	<td><input type="text" id="strategyName" name="strategyName"  <%=editSts%> value="<%=scheduleStrategy.getStrategyName()%>" width="30"></td>
+	<td></td>
 </tr>
+<tr>
+	<td>任务类型:</td>
+	<td><input type="text" id="kind" name="kind"   value="<%=scheduleStrategy.getKind().toString()%>" width="30"></td>
+	<td>可选类型：Schedule,Java,Bean 大小写敏感</td>
+</tr>
+<tr>
+	<td>任务名称:</td>
+	<td><input type="text" id="taskName" name="taskName"  value="<%=scheduleStrategy.getTaskName()%>" width="30"></td>
+	<td>与任务类型匹配的名称例如，调度任务的名称，Class名称或者Bean的名称</td>
+</tr>
+<tr>
+	<td>任务参数:</td>
+	<td><input type="text" id="taskParameter" name="taskParameter"   value="<%=scheduleStrategy.getTaskParameter()%>" width="30"></td>
+	<td>逗号分隔的Key-Value</td>
+</tr>
+
 <tr>
 	<td>单JVM最大线程组数量:</td>
 	<td><input type="text" name="numOfSingleServer" value="<%=scheduleStrategy.getNumOfSingleServer() %>" width="30"></td>
@@ -74,13 +93,13 @@ TD{font-size:12px;}
 
 <script>
 function save(){
-	var taskType = document.all("taskType").value;
+	var strategyName = document.all("strategyName").value;
 	var reg = /.*[\u4e00-\u9fa5]+.*$/; 
-	if(reg.test(taskType)){
+	if(reg.test(strategyName)){
 	   alert('任务类型不能含中文');
 	   return;
 	}
-	if(taskType==null||taskType==''||isContainSpace(taskType)){
+	if(strategyName==null||strategyName==''||isContainSpace(strategyName)){
 		alert('任务类型不能为空或存在空格');
 		return;
 	}

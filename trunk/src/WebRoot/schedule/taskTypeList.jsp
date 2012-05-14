@@ -1,5 +1,5 @@
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleTaskType"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleTaskType"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=GB2312" %>
 <%
@@ -38,7 +38,6 @@ table{border-collapse:collapse}
 		%>
      	<th>任务类型</th>
      	<th>任务处理Bean</th>
-     	<th>任务状态</th>
      	<th>心跳频率(秒)</th>
      	<th>死亡间隔(秒)</th>
      	<th>线程数</th>
@@ -59,14 +58,6 @@ table{border-collapse:collapse}
 	List<ScheduleTaskType> taskTypes = ConsoleManager.getScheduleDataManager().getAllTaskTypeBaseInfo();
 	String taskItems = "";
 	for (int i = 0; i < taskTypes.size(); i++) {
-		String pauseOrResumeAction = "pauseTaskType";
-		String pauseOrResumeActionName = "暂停";
-		String stsName = "正常";
-		if (ScheduleTaskType.STS_PAUSE.equals(taskTypes.get(i).getSts())) {
-			pauseOrResumeAction = "resumeTaskType";
-			pauseOrResumeActionName = "恢复";
-			stsName = "暂停";
-		}
 		taskItems = "";
 		String[] strs = taskTypes.get(i).getTaskItems() ;
 		if (strs != null) {
@@ -87,14 +78,12 @@ table{border-collapse:collapse}
      		<a target="taskDetail" href="taskTypeEdit.jsp?taskType=<%=taskTypes.get(i).getBaseTaskType()%>"  style="color:#0000CD">编辑</a>
      		<a target="taskDetail" href="taskTypeDeal.jsp?action=clearTaskType&taskType=<%=taskTypes.get(i).getBaseTaskType()%>"  style="color:#0000CD">清理</a>
      		<a target="taskDetail" onclick="deleteTaskType('<%=taskTypes.get(i).getBaseTaskType()%>');" href="taskTypeDeal.jsp?action=deleteTaskType&taskType=<%=taskTypes.get(i).getBaseTaskType()%>" style="color:#0000CD">删除</a>
-     		<a target="taskDetail" href="taskTypeDeal.jsp?action=<%=pauseOrResumeAction%>&taskType=<%=taskTypes.get(i).getBaseTaskType()%>" style="color:#0000CD"><%=pauseOrResumeActionName%></a>
      	</td>
 		<%
 			}
 		%>
      	<td><%=taskTypes.get(i).getBaseTaskType()%></td>
      	<td><%=taskTypes.get(i).getDealBeanName()%></td>
-     	<td><%=stsName%></td>
      	<td><%=taskTypes.get(i).getHeartBeatRate() / 1000.0%></td>
      	<td><%=taskTypes.get(i).getJudgeDeadInterval() / 1000.0%></td>
      	<td><%=taskTypes.get(i).getThreadNumber()%></td>
