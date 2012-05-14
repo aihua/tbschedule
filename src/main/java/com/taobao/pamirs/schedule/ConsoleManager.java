@@ -9,6 +9,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
+import com.taobao.pamirs.schedule.taskmanager.IScheduleDataManager;
 import com.taobao.pamirs.schedule.zk.ScheduleStrategyDataManager4ZK;
 import com.taobao.pamirs.schedule.zk.ZKManager;
 
@@ -89,7 +91,7 @@ public class ConsoleManager {
 				scheduleManagerFactory.reInit(p);
 			}
 	}
-	protected static void setScheduleManagerFactory(
+	public static void setScheduleManagerFactory(
 			TBScheduleManagerFactory scheduleManagerFactory) {
 		ConsoleManager.scheduleManagerFactory = scheduleManagerFactory;
 	}

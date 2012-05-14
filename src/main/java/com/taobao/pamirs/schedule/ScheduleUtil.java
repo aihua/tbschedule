@@ -13,6 +13,8 @@ import java.util.Date;
  *
  */
 public class ScheduleUtil {
+	public static String OWN_SIGN_BASE ="BASE";
+
 	public static String getLocalHostName() {
 		try {
 			return InetAddress.getLocalHost().getHostName();
@@ -56,4 +58,25 @@ public class ScheduleUtil {
 		SimpleDateFormat FORMAT = new SimpleDateFormat(formate);
         return FORMAT.parse(d);
 	}
+	public static String getTaskTypeByBaseAndOwnSign(String baseType,String ownSign){
+		if(ownSign.equals(OWN_SIGN_BASE) == true){
+			return baseType;
+		}
+		return baseType+"$" + ownSign;
+	}
+	public static String splitBaseTaskTypeFromTaskType(String taskType){
+		 if(taskType.indexOf("$") >=0){
+			 return taskType.substring(0,taskType.indexOf("$"));
+		 }else{
+			 return taskType;
+		 }
+		 
+	}
+	public static String splitOwnsignFromTaskType(String taskType){
+		 if(taskType.indexOf("$") >=0){
+			 return taskType.substring(taskType.indexOf("$")+1);
+		 }else{
+			 return OWN_SIGN_BASE;
+		 }
+	}	
 }
