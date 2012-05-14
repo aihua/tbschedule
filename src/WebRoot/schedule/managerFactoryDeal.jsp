@@ -1,5 +1,5 @@
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleStrategy"%>
+<%@page import="com.taobao.pamirs.schedule.strategy.ScheduleStrategy"%>
 <%@ page contentType="text/html; charset=GB2312" %>
 <html>
 <head>

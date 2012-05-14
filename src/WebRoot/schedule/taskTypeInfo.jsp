@@ -1,9 +1,9 @@
 
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleTaskItem"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleServer"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleTaskTypeRunningInfo"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleTaskType"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleTaskItem"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleServer"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleTaskTypeRunningInfo"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleTaskType"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=GB2312" %>
 <html>
@@ -113,7 +113,7 @@ if(taskTypeRunningInfoList.size() ==0){
    %>
 	   <tr>
 	   <td><%=taskItemList.get(j).getTaskItem()%></td>
-	   <td><%=taskItemList.get(j).getCurrentScheduleServer()%></td>
+	   <td><%=taskItemList.get(j).getCurrentScheduleServer()==null?"--":taskItemList.get(j).getCurrentScheduleServer()%></td>	   
 	   <td><%=taskItemList.get(j).getRequestScheduleServer()==null?"--":taskItemList.get(j).getRequestScheduleServer()%></td>	   
 	   <td><%=taskItemList.get(j).getSts()%></td>
 	   <td><%=taskItemList.get(j).getDealParameter()==null?"":taskItemList.get(j).getDealParameter()%></td>

@@ -1,5 +1,5 @@
-<%@page import="com.taobao.pamirs.schedule.ScheduleStrategy"%>
-<%@page import="com.taobao.pamirs.schedule.TBScheduleManager"%>
+<%@page import="com.taobao.pamirs.schedule.strategy.ScheduleStrategy"%>
+<%@page import="com.taobao.pamirs.schedule.ScheduleUtil"%>
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=GB2312" %>
@@ -28,7 +28,11 @@ table{border-collapse:collapse}
      	<%if("true".equals(isManager)){%>
      	<th>管理</th>
 		<%}%>
+     	<th>策略名称</th>
+     	<th>任务状态</th>
      	<th>任务类型</th>
+     	<th>任务名称</th>
+     	<th>任务参数</th>
      	<th>单JVM最大线程组数量</th>
     	<th>最大线程组数量</th>
      	<th>IP地址(逗号分隔)</th>
@@ -46,19 +50,34 @@ for(int i=0;i<scheduleStrategyList.size();i++){
 		}
 		ipIds = ipIds + ipList[j];
 	}
-   String baseTaskType = TBScheduleManager.splitBaseTaskTypeFromTaskType(scheduleStrategy.getTaskType());
-   String ownSign = TBScheduleManager.splitOwnsignFromTaskType(scheduleStrategy.getTaskType());   
+	
+	String pauseOrResumeAction = "pauseTaskType";
+	String pauseOrResumeActionName = "停止";
+	String stsName = "正常";
+	if (ScheduleStrategy.STS_PAUSE.equals(scheduleStrategyList.get(i).getSts())) {
+		pauseOrResumeAction = "resumeTaskType";
+		pauseOrResumeActionName = "恢复";
+		stsName = "停止";
+	}
+
+	
 
 %>
-     <tr onclick="openDetail(this,'<%=baseTaskType%>','<%=ownSign%>','<%=scheduleStrategy.getTaskType()%>')">
+     <tr onclick="openDetail(this,'<%=scheduleStrategy.getStrategyName()%>')">
      	<td><%=(i+1)%></td>
      	<%if("true".equals(isManager)){%>
      	<td width="100" align="center">
-     	    <a target="scheduleStrategyDetail" href="scheduleStrategyEdit.jsp?taskType=<%=scheduleStrategy.getTaskType()%>" style="color:#0000CD">编辑</a>
-     	    <a target="scheduleStrategyDetail" href="scheduleStrategyDeal.jsp?action=deleteScheduleStrategy&taskType=<%=scheduleStrategy.getTaskType()%>" style="color:#0000CD">删除</a>
+     	    <a target="strategyDetail" href="scheduleStrategyEdit.jsp?taskType=<%=scheduleStrategy.getStrategyName()%>" style="color:#0000CD">编辑</a>
+     	    <a target="strategyDetail" href="scheduleStrategyDeal.jsp?action=deleteScheduleStrategy&strategyName=<%=scheduleStrategy.getStrategyName()%>" style="color:#0000CD">删除</a>
+     		<a target="strategyDetail" href="scheduleStrategyDeal.jsp?action=<%=pauseOrResumeAction%>&strategyName=<%=scheduleStrategy.getStrategyName()%>" style="color:#0000CD"><%=pauseOrResumeActionName%></a>
      	</td>
 		<%}%>
-     	<td><%=scheduleStrategy.getTaskType()%></td>
+     	<td><%=scheduleStrategy.getStrategyName()%></td>
+     	<td><%=stsName%></td>
+     	<td><%=scheduleStrategy.getKind()%></td>
+     	<td><%=scheduleStrategy.getTaskName()%></td>
+     	<td><%=scheduleStrategy.getTaskParameter()%></td>
+     	
      	<td align="center"><%=scheduleStrategy.getNumOfSingleServer()%></td>
      	<td align="center"><%=scheduleStrategy.getAssignNum()%></td>
 		<td><%=ipIds%></td>
@@ -69,25 +88,22 @@ for(int i=0;i<scheduleStrategyList.size();i++){
 </table>
 <br/>
 <%if("true".equals(isManager)){%>
-<a target="scheduleStrategyDetail" href="scheduleStrategyEdit.jsp?taskType=-1" style="color:#0000CD">创建新策略...</a>
+<a target="strategyDetail" href="scheduleStrategyEdit.jsp?taskType=-1" style="color:#0000CD">创建新策略...</a>
 <%}%>
-任务运行情况：
-<iframe  name="scheduleStrategyDetail" height="250" width="100%"></iframe>
 任务在各个机器上的分配情况：
-<iframe  name="scheduleStrategyRuntime" height="120" width="100%"></iframe>
+<iframe  name="strategyDetail" height="80%" width="100%"></iframe>
 </body>
 </html>
 <script>
 
 var oldSelectRow = null;
-function openDetail(obj,baseTaskType,ownSign,taskType){
+function openDetail(obj,strategyName){
 	if(oldSelectRow != null){
 		oldSelectRow.bgColor="";
 	}
 	obj.bgColor="#FFD700";
 	oldSelectRow = obj;
-    document.all("scheduleStrategyDetail").src = "taskTypeInfo.jsp?baseTaskType=" + baseTaskType +"&ownSign=" + ownSign;
-    document.all("scheduleStrategyRuntime").src = "scheduleStrategyRuntime.jsp?taskType=" + taskType;
+    document.all("strategyDetail").src = "scheduleStrategyRuntime.jsp?strategyName=" + strategyName;
 }
 if(contentTable.rows.length >1){
 	contentTable.rows[1].click();

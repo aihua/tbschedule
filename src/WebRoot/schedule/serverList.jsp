@@ -1,6 +1,6 @@
 
-<%@page import="com.taobao.pamirs.schedule.ScheduleTaskType"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleServer"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleTaskType"%>
+<%@page import="com.taobao.pamirs.schedule.taskmanager.ScheduleServer"%>
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=GB2312" %>

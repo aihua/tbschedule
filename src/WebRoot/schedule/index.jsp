@@ -21,8 +21,8 @@ TD{background-color: ;border:#8CB2E3 solid;border-width:0 1 1 0;font-size:12px;}
 </head>
 <body style="font-size:12px;">
 <h1 align="center">TaobaoSchedule调度管理控制台</h1>
+<a id="strategyList" onclick="linkOnclick(this);"  target="content" href="scheduleStrategyList.jsp?manager=<%=isManager%>" style="color:#0000CD">调度策略</a>
 <a id="taskTypeList" onclick="linkOnclick(this);" target="content" href="taskTypeList.jsp?manager=<%=isManager%>" style="color:#0000CD">任务管理</a>
-<a id="strategyList" onclick="linkOnclick(this);"  target="content" href="scheduleStrategyList.jsp?manager=<%=isManager%>" style="color:#0000CD">策略管理</a>
 <a id="managerFactoryList" onclick="linkOnclick(this);"  target="content" href="managerFactoryList.jsp?manager=<%=isManager%>" style="color:#0000CD">机器管理</a>
 <a id="serverList" onclick="linkOnclick(this);"  target="content" href="serverList.jsp" style="color:#0000CD">处理线程组列表</a>
 
@@ -38,7 +38,7 @@ TD{background-color: ;border:#8CB2E3 solid;border-width:0 1 1 0;font-size:12px;}
 %>
 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp请参考：<a href="http://code.taobao.org/p/tbschedule/wiki/index/">tbschedule开源项目</a>
 &nbsp&nbsp<font style="color:red;font-size:15">[建议使用IE8]</font>
-<iframe  name="content" FRAMEBORDER="0"  height="85%" width="100%" src="taskTypeList.jsp?manager=<%=isManager%>"></iframe>
+<iframe  name="content" FRAMEBORDER="0"  height="85%" width="100%" src="scheduleStrategyList.jsp?manager=<%=isManager%>"></iframe>
 </body>
 </html>
 

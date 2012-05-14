@@ -1,6 +1,5 @@
-<%@page import="com.taobao.pamirs.schedule.ManagerFactoryInfo"%>
-<%@page import="com.taobao.pamirs.schedule.ScheduleStrategy"%>
-<%@page import="com.taobao.pamirs.schedule.TBScheduleManager"%>
+<%@page import="com.taobao.pamirs.schedule.strategy.ManagerFactoryInfo"%>
+<%@page import="com.taobao.pamirs.schedule.strategy.ScheduleStrategy"%>
 <%@page import="com.taobao.pamirs.schedule.ConsoleManager"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=GB2312" %>
