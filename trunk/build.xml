@@ -10,7 +10,7 @@
     </copy>
     <copy todir="ScheduleConsole/WEB-INF/lib">
 	<fileset dir="./target">
-	  <include name="taobao-pamirs-schedule*.jar"/>
+	  <include name="tbschedule*.jar"/>
 	</fileset>
     </copy>
     <copy todir="ScheduleConsole/WEB-INF/lib">
