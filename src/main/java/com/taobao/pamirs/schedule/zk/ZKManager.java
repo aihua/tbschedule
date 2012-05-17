@@ -27,6 +27,9 @@ public class ZKManager{
 
 	public ZKManager(Properties aProperties) throws Exception{
 		this.properties = aProperties;
+		this.createZooKeeper();
+	}
+	private void createZooKeeper() throws Exception{
 		String authString = this.properties.getProperty(keys.userName.toString())
 				+ ":"+ this.properties.getProperty(keys.password.toString());
 		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
@@ -38,7 +41,8 @@ public class ZKManager{
 				DigestAuthenticationProvider.generateDigest(authString))));
 		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
 	}
-	public void close() throws InterruptedException{
+
+	public void close() throws InterruptedException {
 		log.info("πÿ±’zookeeper¡¨Ω”");
 		this.zk.close();
 	}
@@ -57,7 +61,10 @@ public class ZKManager{
 	public String getConnectStr(){
 		return this.properties.getProperty(keys.zkConnectString.toString());
 	}
-	public boolean checkZookeeperState(){
+	public boolean isAlive(){
+		return zk.getState().isAlive();
+	}
+	public boolean checkZookeeperState() throws Exception{
 		return zk.getState().isAlive() && (zk.getState() == States.CONNECTED);
 	}
 
@@ -108,7 +115,7 @@ public class ZKManager{
 	}
 	public ZooKeeper getZooKeeper() throws Exception {
 		if(this.checkZookeeperState()==false){
-			throw new Exception("Zookeeper["+ this.getConnectStr()+"] connect error" );
+			throw new Exception("Zookeeper["+ this.getConnectStr()+"] connect error :" + this.zk.getState() );
 		}
 		return this.zk;
 	}

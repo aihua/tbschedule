@@ -260,11 +260,23 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 				this.managerMap.remove(strategyName);
 			}
 			
-		}
-			
+		}			
 	}
-
-    public boolean isZookeeperInitialSucess(){
+	/**
+	 * 重启所有的服务
+	 * @throws Exception
+	 */
+    public void reStart() throws Exception{
+		if(this.timer != null){
+			 this.timer.cancel();
+			 this.timer = null;
+		}
+		this.stopServer(null);
+		this.zkManager.close();
+		this.uuid = null;
+		this.init();
+    }
+    public boolean isZookeeperInitialSucess() throws Exception{
     	return this.zkManager.checkZookeeperState();
     }
 	public String[] getScheduleTaskDealList() {
@@ -335,7 +347,11 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 	public void run() {
 		try {
 			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-			this.factory.refresh();
+			if(this.factory.zkManager.isAlive() == false){
+				this.factory.reStart();
+			}else{
+			    this.factory.refresh();
+			}
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
