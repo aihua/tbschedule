@@ -20,9 +20,9 @@
 		editSts="style=\"background-color: blue\" readonly=\"readonly\"";
 	}else{
 		scheduleStrategy = new ScheduleStrategy();
-		scheduleStrategy.setStrategyName("请输入新的调度策略名称...");
+		scheduleStrategy.setStrategyName("");
 		scheduleStrategy.setKind(ScheduleStrategy.Kind.Schedule);
-		scheduleStrategy.setTaskName("请输入调度任务名称...");
+		scheduleStrategy.setTaskName("");
 		scheduleStrategy.setTaskParameter("");
 		scheduleStrategy.setNumOfSingleServer(0);
 		scheduleStrategy.setAssignNum(2);
@@ -49,7 +49,7 @@ TD{font-size:12px;}
 <tr>
 	<td>策略名称:</td>
 	<td><input type="text" id="strategyName" name="strategyName"  <%=editSts%> value="<%=scheduleStrategy.getStrategyName()%>" width="30"></td>
-	<td></td>
+	<td>必须填写，不能有中文和特殊字符</td>
 </tr>
 <tr>
 	<td>任务类型:</td>
@@ -59,12 +59,12 @@ TD{font-size:12px;}
 <tr>
 	<td>任务名称:</td>
 	<td><input type="text" id="taskName" name="taskName"  value="<%=scheduleStrategy.getTaskName()%>" width="30"></td>
-	<td>与任务类型匹配的名称例如，调度任务的名称，Class名称或者Bean的名称</td>
+	<td>与任务类型匹配的名称例如：1、任务管理中配置的任务名称(对应Schedule) 2、Class名称(对应java) 3、Bean的名称(对应Bean)</td>
 </tr>
 <tr>
 	<td>任务参数:</td>
 	<td><input type="text" id="taskParameter" name="taskParameter"   value="<%=scheduleStrategy.getTaskParameter()%>" width="30"></td>
-	<td>逗号分隔的Key-Value</td>
+	<td>逗号分隔的Key-Value。 对任务类型为Schedule的无效，需要通过任务管理来配置的</td>
 </tr>
 
 <tr>
