@@ -20,11 +20,8 @@ if(ConsoleManager.isInitial() == false){
 	  action ="query";
   }
   StringWriter writer = new StringWriter();
-	System.out.println(action);
-  
   if(action.equals("delete")){
 	  try{
-		System.out.println(path);
 	  	ConsoleManager.getScheduleStrategyManager().deleteTree(path);
 	  	writer.write("É¾³ýÄ¿Â¼£º" + path + "³É¹¦£¡");
 	  }catch(Exception e){
