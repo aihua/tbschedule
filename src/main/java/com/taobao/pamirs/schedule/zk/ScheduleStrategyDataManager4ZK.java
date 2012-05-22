@@ -396,6 +396,9 @@ public class ScheduleStrategyDataManager4ZK{
 			throws Exception {
 		ZKTools.printTree(this.getZooKeeper(),path,writer,lineSplitChar);
 	}
+	public void deleteTree(String path) throws Exception{
+		ZKTools.deleteTree(this.getZooKeeper(), path);
+	}
 	public ZooKeeper getZooKeeper() throws Exception {
 		return this.zkManager.getZooKeeper();
 	}
