@@ -17,6 +17,22 @@ import com.taobao.pamirs.schedule.zk.ScheduleWatcher;
 import com.taobao.pamirs.schedule.zk.ZKTools;
 
 public class ZookeeperTest {
+@Test
+	 public void testCloseStatus() throws Exception{
+		 ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,
+					new ScheduleWatcher());
+		 int i = 1;
+		 while(true){
+			 try{
+		 StringWriter writer = new StringWriter();
+		 ZKTools.printTree(zk, "/zookeeper/quota", writer,"");
+		 System.out.println(i++ +"----" +writer.getBuffer().toString());
+		 Thread.sleep(2000);
+			 }catch(Exception e){
+				 System.out.println(e.getMessage());
+			 }
+		 }
+	 }
  @Test
  public void testPrint() throws Exception{
 	 ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,
