@@ -160,7 +160,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 		//设置初始化成功标准，避免在leader转换的时候，新增的线程组初始化失败
 		scheduleCenter.setInitialRunningInfoSucuss(this.currenScheduleServer.getBaseTaskType(), this.currenScheduleServer.getTaskType(), this.currenScheduleServer.getUuid());
 		scheduleCenter.clearTaskItem(this.currenScheduleServer.getTaskType(), serverList);
-		scheduleCenter.assignTaskItem(this.currenScheduleServer.getTaskType(),this.currenScheduleServer.getUuid(), serverList);
+		scheduleCenter.assignTaskItem(this.currenScheduleServer.getTaskType(),this.currenScheduleServer.getUuid(),this.taskTypeInfo.getMaxTaskItemsOfOneThreadGroup(),serverList);
 	}	
 	/**
 	 * 重新加载当前服务器的任务队列

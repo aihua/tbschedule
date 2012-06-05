@@ -571,7 +571,66 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
     	return uuid.equals(getLeader(serverList));
     }
 	@Override
-	public void assignTaskItem(String taskType, String currentUuid,
+	public void assignTaskItem(String taskType, String currentUuid,int maxNumOfOneServer,
+			List<String> taskServerList) throws Exception {
+		 if(this.isLeader(currentUuid,taskServerList)==false){
+			 if(log.isDebugEnabled()){
+			   log.debug(currentUuid +":不是负责任务分配的Leader,直接返回");
+			 }
+			 return;
+		 }
+		 if(log.isDebugEnabled()){
+			   log.debug(currentUuid +":开始重新分配任务......");
+		 }		
+		 if(taskServerList.size()<=0){
+			 //在服务器动态调整的时候，可能出现服务器列表为空的清空
+			 return;
+		 }
+		 String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(taskType);
+		 String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType + "/" + taskType + "/" + this.PATH_TaskItem;
+		 List<String> children = this.getZooKeeper().getChildren(zkPath, false);
+		 Collections.sort(children);
+		 int unModifyCount =0;
+		 int[] taskNums = ScheduleUtil.assignTaskNumber(taskServerList.size(), children.size(), maxNumOfOneServer);
+		 int point =0;
+		 int count = 0;
+		 String NO_SERVER_DEAL = "没有分配到服务器"; 
+		 for(int i=0;i <children.size();i++){
+			String name = children.get(i);
+			if(point <taskServerList.size() && i >= count + taskNums[point]){
+				count = count + taskNums[point];
+				point = point + 1;
+			}
+			String serverName = NO_SERVER_DEAL;
+			if(point < taskServerList.size() ){
+				serverName = taskServerList.get(point);
+			}
+			byte[] curServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
+			byte[] reqServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/req_server",false,null);
+			
+			if(curServerValue == null || new String(curServerValue).equals(NO_SERVER_DEAL)){
+				this.getZooKeeper().setData(zkPath + "/" + name + "/cur_server",serverName.getBytes(),-1);
+				this.getZooKeeper().setData(zkPath + "/" + name + "/req_server",null,-1);
+			}else if(new String(curServerValue).equals(serverName)==true && reqServerValue == null ){
+				//不需要做任何事情
+				unModifyCount = unModifyCount + 1;
+			}else{
+				this.getZooKeeper().setData(zkPath + "/" + name + "/req_server",serverName.getBytes(),-1);
+			}
+		 }	
+		 
+		 if(unModifyCount < children.size()){ //设置需要所有的服务器重新装载任务
+			 this.updateReloadTaskItemFlag(taskType);
+		 }
+		 if(log.isDebugEnabled()){
+			 StringBuffer buffer = new StringBuffer();
+			 for(ScheduleTaskItem taskItem: this.loadAllTaskItem(taskType)){
+				buffer.append("\n").append(taskItem.toString());
+			 }
+			 log.debug(buffer);
+		 }
+	}
+	public void assignTaskItem22(String taskType, String currentUuid,
 			List<String> serverList) throws Exception {
 		 if(this.isLeader(currentUuid,serverList)==false){
 			 if(log.isDebugEnabled()){
