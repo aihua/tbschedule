@@ -71,6 +71,10 @@ TD{font-size:12px;}
 	<td>执行结束时间：</td><td><input type="text" name="permitRunEndTime" value="<%=taskType.getPermitRunEndTime()==null?"":taskType.getPermitRunEndTime()%>" width="30"></td>
 </tr>
 <tr>
+	<td>单线程组最大任务项：</td><td><input type="text" name="maxTaskItemsOfOneThreadGroup" value="<%=taskType.getMaxTaskItemsOfOneThreadGroup()%>" width="30"></td>
+	<td colspan="2">每一组线程能分配的最大任务数量，避免在随着机器的减少把正常的服务器压死，0或者空表示不限制</td>
+</tr>
+<tr>
 	<td>自定义参数(字符串):</td><td colspan="3"><input type="text" id="taskParameter" name="taskParameter" value="<%=taskType.getTaskParameter()==null?"":taskType.getTaskParameter()%>" style="width:657"></td>
 </tr>
 <tr>

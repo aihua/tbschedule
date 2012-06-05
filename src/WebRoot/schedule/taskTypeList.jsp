@@ -49,6 +49,7 @@ table{border-collapse:collapse}
     	<th>清除处理域信息时长(小时)</th>
      	<th>执行开始时间</th>
      	<th>执行结束时间</th>
+     	<th>单线程组最大任务项</th>
      	<th>自定义参数</th>
      	<th>任务项</th>
      </tr>
@@ -99,6 +100,9 @@ table{border-collapse:collapse}
 						: taskTypes.get(i).getPermitRunStartTime()%></td>
      	<td><%=taskTypes.get(i).getPermitRunEndTime() == null ? "--"
 						: taskTypes.get(i).getPermitRunEndTime()%></td>   
+						
+    	<td><%=taskTypes.get(i).getMaxTaskItemsOfOneThreadGroup()%></td>   
+
 		<td><%=taskTypes.get(i).getTaskParameter() == null ? "--"
 						: taskTypes.get(i).getTaskParameter()%></td>   
 		<td><%=taskItems%></td>
