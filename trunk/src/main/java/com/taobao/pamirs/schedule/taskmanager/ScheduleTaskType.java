@@ -91,6 +91,11 @@ public class ScheduleTaskType implements java.io.Serializable {
      * 任务项数组
      */
     private String[] taskItems;
+    
+    /**
+     * 每个线程组能处理的最大任务项目书目
+     */
+    private int maxTaskItemsOfOneThreadGroup = 0;
     /**
      * 版本号
      */
@@ -281,4 +286,14 @@ public class ScheduleTaskType implements java.io.Serializable {
 	public String getTaskParameter() {
 		return taskParameter;
 	}
+
+	public int getMaxTaskItemsOfOneThreadGroup() {
+		return maxTaskItemsOfOneThreadGroup;
+	}
+
+	public void setMaxTaskItemsOfOneThreadGroup(int maxTaskItemsOfOneThreadGroup) {
+		this.maxTaskItemsOfOneThreadGroup = maxTaskItemsOfOneThreadGroup;
+	}
+	
+	
 }

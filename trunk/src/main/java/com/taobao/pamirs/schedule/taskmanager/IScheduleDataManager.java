@@ -91,7 +91,7 @@ public interface IScheduleDataManager{
 	 * @param serverList
 	 * @throws Exception
 	 */
-	public void assignTaskItem(String taskType,String currentUuid, List<String> serverList) throws Exception;
+	public void assignTaskItem(String taskType,String currentUuid, int maxNumOfOneServer,List<String> serverList) throws Exception;
 
 	/**
 	 * 发送心跳信息

@@ -174,29 +174,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			}
 			ScheduleStrategy scheduleStrategy =this.scheduleStrategyManager.loadStrategy(run.getStrategyName());
 			
-			int[] nums = new int[factoryList.size()];
-			if(scheduleStrategy.getNumOfSingleServer() >0){
-				int count =0;
-				for(int i=0;i<factoryList.size();i++){
-					if( scheduleStrategy.getAssignNum() - count > scheduleStrategy.getNumOfSingleServer()){
-						nums[i] = scheduleStrategy.getNumOfSingleServer();
-					}else{
-						nums[i] = scheduleStrategy.getAssignNum() - count;
-					}
-					count = count + nums[i];
-				}
-			}else{
-				int numOfSingle = scheduleStrategy.getAssignNum() / factoryList.size();
-				int otherNum = scheduleStrategy.getAssignNum() % factoryList.size();
-				for(int i=0;i<factoryList.size();i++){
-					if(i<otherNum){
-						nums[i] = numOfSingle + 1;
-					}else{
-						nums[i] = numOfSingle;
-					}
-				}
-			}
-
+			int[] nums =  ScheduleUtil.assignTaskNumber(factoryList.size(), scheduleStrategy.getAssignNum(), scheduleStrategy.getNumOfSingleServer());
 			for(int i=0;i<factoryList.size();i++){
 				ScheduleStrategyRunntime factory = 	factoryList.get(i);
 				//更新请求的服务器数量
