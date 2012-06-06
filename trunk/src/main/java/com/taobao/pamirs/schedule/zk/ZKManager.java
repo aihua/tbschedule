@@ -61,11 +61,8 @@ public class ZKManager{
 	public String getConnectStr(){
 		return this.properties.getProperty(keys.zkConnectString.toString());
 	}
-	public boolean isAlive(){
-		return zk.getState().isAlive();
-	}
 	public boolean checkZookeeperState() throws Exception{
-		return zk.getState().isAlive() && (zk.getState() == States.CONNECTED);
+		return zk.getState() == States.CONNECTED;
 	}
 
 	public void initial() throws Exception {

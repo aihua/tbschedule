@@ -321,9 +321,11 @@ class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 		while (true) {
 			try {
 				if (this.isStopSchedule == true) { // 停止队列调度
-					this.threadList.remove(Thread.currentThread());
-					if(this.threadList.size()==0){
-						this.scheduleManager.unRegisterScheduleServer();
+					synchronized (this.threadList) {
+						this.threadList.remove(Thread.currentThread());
+						if(this.threadList.size()==0){
+							this.scheduleManager.unRegisterScheduleServer();
+						}
 					}
 					return;
 				}
