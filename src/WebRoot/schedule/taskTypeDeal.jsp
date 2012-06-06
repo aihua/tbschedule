@@ -32,7 +32,8 @@
 			//taskType.setExpireOwnSignInterval(request.getParameter("expireOwnSignInterval")==null?0: Integer.parseInt(request.getParameter("threadNumber")));
 			taskType.setPermitRunStartTime(request.getParameter("permitRunStartTime"));
 			taskType.setPermitRunEndTime(request.getParameter("permitRunEndTime"));
-			taskType.setMaxTaskItemsOfOneThreadGroup(request.getParameter("maxTaskItemsOfOneThreadGroup")==null?0:Integer.parseInt(request.getParameter("maxTaskItemsOfOneThreadGroup")));		
+			String s= request.getParameter("maxTaskItemsOfOneThreadGroup");
+			taskType.setMaxTaskItemsOfOneThreadGroup(s==null || s.trim().length() ==0?0:Integer.parseInt(request.getParameter("maxTaskItemsOfOneThreadGroup")));		
 			taskType.setTaskParameter(request.getParameter("taskParameter"));
 			
 			String itemDefines  =request.getParameter("taskItems");
