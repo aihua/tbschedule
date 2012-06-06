@@ -191,9 +191,11 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	            if(this.isStopSchedule == true){//停止队列调度
 	              this.m_lockObject.realseThread();
 	              this.m_lockObject.notifyOtherThread();//通知所有的休眠线程
-				  this.threadList.remove(Thread.currentThread());
-				  if(this.threadList.size()==0){
-						this.scheduleManager.unRegisterScheduleServer();
+				  synchronized (this.threadList) {			
+					  this.threadList.remove(Thread.currentThread());
+					  if(this.threadList.size()==0){
+							this.scheduleManager.unRegisterScheduleServer();
+					  }
 				  }
 				  return;
 	            }

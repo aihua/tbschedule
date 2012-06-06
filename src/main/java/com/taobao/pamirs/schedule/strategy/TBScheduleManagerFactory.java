@@ -97,6 +97,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			this.zkManager = new ZKManager(p);
 			this.errorMessage = "Zookeeper connecting ......" + this.zkManager.getConnectStr();
 			initialThread = new InitialThread(this);
+			initialThread.setName("TBScheduleManagerFactory-initialThread");
 			initialThread.start();
 		}finally{
 			this.lock.unlock();
@@ -317,6 +318,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 class ManagerFactoryTimerTask extends java.util.TimerTask {
 	private static transient Log log = LogFactory.getLog(ManagerFactoryTimerTask.class);
 	TBScheduleManagerFactory factory;
+	int count =0;
 
 	public ManagerFactoryTimerTask(TBScheduleManagerFactory aFactory) {
 		this.factory = aFactory;
@@ -325,9 +327,16 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 	public void run() {
 		try {
 			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-			if(this.factory.zkManager.isAlive() == false){
-				this.factory.reStart();
+			if(this.factory.zkManager.checkZookeeperState() == false){
+				if(count > 5){
+				   log.error("Zookeeper连接失败，关闭所有的任务后，重新连接Zookeeper服务器......");
+				   this.factory.reStart();
+				  
+				}else{
+				   count = count + 1;
+				}
 			}else{
+				count = 0;
 			    this.factory.refresh();
 			}
 		} catch (Exception ex) {
@@ -355,7 +364,7 @@ class InitialThread extends Thread{
 				count = count + 1;
 				if(count % 50 == 0){
 					facotry.errorMessage = "Zookeeper connecting ......" + facotry.zkManager.getConnectStr() + " spendTime:" + count * 20 +"(ms)";
-					log.warn(facotry.errorMessage);
+					log.error(facotry.errorMessage);
 				}
 				Thread.sleep(20);
 				if(this.isStop ==true){
