@@ -204,7 +204,11 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			}
 			while(list.size() > run.getRequestNum() && list.size() >0){
 				IStrategyTask task  =  list.remove(list.size() - 1);
-				task.stop();
+					try {
+						task.stop();
+					} catch (Throwable e) {
+						logger.error("注销任务错误：" + e.getMessage(), e);
+					}
 				}
 		   //不足，增加调度器
 		   ScheduleStrategy strategy = this.scheduleStrategyManager.loadStrategy(run.getStrategyName());
@@ -226,7 +230,11 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			String[] nameList = (String[])this.managerMap.keySet().toArray(new String[0]);
 			for (String name : nameList) {
 				for (IStrategyTask task : this.managerMap.get(name)) {
-					task.stop();
+					try{
+					  task.stop();
+					}catch(Throwable e){
+					  logger.error("注销任务错误："+e.getMessage(),e);
+					}
 				}
 				this.managerMap.remove(name);
 			}
@@ -234,7 +242,11 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			List<IStrategyTask> list = this.managerMap.get(strategyName);
 			if(list != null){
 				for(IStrategyTask task:list){
-					task.stop();
+					try {
+						task.stop();
+					} catch (Throwable e) {
+						logger.error("注销任务错误：" + e.getMessage(), e);
+					}
 				}
 				this.managerMap.remove(strategyName);
 			}
