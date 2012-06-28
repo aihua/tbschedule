@@ -15,5 +15,5 @@ public interface IScheduleTaskDealMulti<T>  extends IScheduleTaskDeal<T> {
  * @return
  * @throws Exception
  */
-  public boolean execute(Object[] tasks,String ownSign) throws Exception;
+  public boolean execute(T[] tasks,String ownSign) throws Exception;
 }
