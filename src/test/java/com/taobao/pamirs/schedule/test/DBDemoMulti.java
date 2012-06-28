@@ -89,7 +89,7 @@ public class DBDemoMulti implements	IScheduleTaskDealMulti<Long> {
 
 
 
-	public boolean execute(Object[] tasks, String ownSign) throws Exception {
+	public boolean execute(Long[] tasks, String ownSign) throws Exception {
 		Connection conn = null;
 		long id = 0;
 		try {
