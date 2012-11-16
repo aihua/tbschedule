@@ -42,10 +42,6 @@ public class ScheduleUtil {
 		}
 	}
 
-	public static long getCurrentTimeMillis() {
-		//return TBSysdateManager.getCurrentTimeMillis();
-		return System.currentTimeMillis();
-	}
 	public static String transferDataToString(Date d){
 		SimpleDateFormat DATA_FORMAT_yyyyMMddHHmmss = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return DATA_FORMAT_yyyyMMddHHmmss.format(d);

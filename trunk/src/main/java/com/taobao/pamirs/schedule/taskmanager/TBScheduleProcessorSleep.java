@@ -11,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import com.taobao.pamirs.schedule.IScheduleTaskDeal;
 import com.taobao.pamirs.schedule.IScheduleTaskDealMulti;
 import com.taobao.pamirs.schedule.IScheduleTaskDealSingle;
-import com.taobao.pamirs.schedule.ScheduleUtil;
 import com.taobao.pamirs.schedule.TaskItemDefine;
 
 /**
@@ -163,7 +162,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 						scheduleManager.getScheduleServer().getOwnSign(),
 						this.scheduleManager.getTaskItemCount(), taskItems,
 						taskTypeInfo.getFetchDataNumber());
-				scheduleManager.getScheduleServer().setLastFetchDataTime(new Timestamp(ScheduleUtil.getCurrentTimeMillis()));
+				scheduleManager.getScheduleServer().setLastFetchDataTime(new Timestamp(scheduleManager.scheduleCenter.getSystemTime()));
 				if(tmpList != null){
 				   this.taskList.addAll(tmpList);
 				}
@@ -212,38 +211,35 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	            }
 	            
 	            try {//运行相关的程序
-	              startTime =ScheduleUtil.getCurrentTimeMillis();
+	              startTime =scheduleManager.scheduleCenter.getSystemTime();
 	              if (this.isMutilTask == false) {
 						if (((IScheduleTaskDealSingle) this.taskDealBean).execute(executeTask,scheduleManager.getScheduleServer().getOwnSign()) == true) {
-							addSuccessNum(1, ScheduleUtil.getCurrentTimeMillis()
+							addSuccessNum(1, scheduleManager.scheduleCenter.getSystemTime()
 									- startTime,
 									"com.taobao.pamirs.schedule.TBScheduleProcessorSleep.run");
 						} else {
-							addFailNum(1, ScheduleUtil.getCurrentTimeMillis()
+							addFailNum(1, scheduleManager.scheduleCenter.getSystemTime()
 									- startTime,
 									"com.taobao.pamirs.schedule.TBScheduleProcessorSleep.run");
 						}
 					} else {
 						if (((IScheduleTaskDealMulti) this.taskDealBean)
 								.execute((Object[]) executeTask,scheduleManager.getScheduleServer().getOwnSign()) == true) {
-							addSuccessNum(((Object[]) executeTask).length, ScheduleUtil
-									.getCurrentTimeMillis()
+							addSuccessNum(((Object[]) executeTask).length,scheduleManager.scheduleCenter.getSystemTime()
 									- startTime,
 									"com.taobao.pamirs.schedule.TBScheduleProcessorSleep.run");
 						} else {
-							addFailNum(((Object[]) executeTask).length, ScheduleUtil
-									.getCurrentTimeMillis()
+							addFailNum(((Object[]) executeTask).length,scheduleManager.scheduleCenter.getSystemTime()
 									- startTime,
 									"com.taobao.pamirs.schedule.TBScheduleProcessorSleep.run");
 						}
 					} 
 	            }catch (Throwable ex) {
 					if (this.isMutilTask == false) {
-						addFailNum(1, ScheduleUtil.getCurrentTimeMillis() - startTime,
+						addFailNum(1,scheduleManager.scheduleCenter.getSystemTime()- startTime,
 								"TBScheduleProcessor.run");
 					} else {
-						addFailNum(((Object[]) executeTask).length, ScheduleUtil
-								.getCurrentTimeMillis()
+						addFailNum(((Object[]) executeTask).length, scheduleManager.scheduleCenter.getSystemTime()
 								- startTime,
 								"TBScheduleProcessor.run");
 					}
@@ -257,7 +253,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 				if (this.m_lockObject.realseThreadButNotLast() == false) {
 					int size = 0;
 					Thread.currentThread().sleep(100);
-					startTime = ScheduleUtil.getCurrentTimeMillis();
+					startTime =scheduleManager.scheduleCenter.getSystemTime();
 					// 装载数据
 					size = this.loadScheduleData();
 					if (size > 0) {

@@ -12,6 +12,7 @@ import com.taobao.pamirs.schedule.TaskItemDefine;
  * 
  */
 public interface IScheduleDataManager{
+	public long getSystemTime();
 	/**
 	 * 重新装载当前server需要处理的数据队列
 	 * 

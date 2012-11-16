@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.taobao.pamirs.schedule.ScheduleUtil;
 import com.taobao.pamirs.schedule.TaskItemDefine;
 import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
 
@@ -53,7 +52,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 					  }
 					}
     			   int count =0;
-    			   lastReloadTaskItemListTime = ScheduleUtil.getCurrentTimeMillis();
+    			   lastReloadTaskItemListTime = scheduleCenter.getSystemTime();
 				   while(getCurrentScheduleTaskItemListNow().size() <= 0){
     				      if(isStopSchedule == true){
     				    	  log.debug("外部命令终止调度,退出调度队列获取：" + currenScheduleServer.getUuid());
@@ -186,7 +185,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 			//真正开始处理数据
 			this.getCurrentScheduleTaskItemListNow();
 		}
-		this.lastReloadTaskItemListTime = ScheduleUtil.getCurrentTimeMillis();		
+		this.lastReloadTaskItemListTime = this.scheduleCenter.getSystemTime();		
 		return this.currentTaskItemList;		
 		}catch(Exception e){
 			throw new RuntimeException(e);
@@ -207,7 +206,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 			
 			//如果超过10个心跳周期还没有获取到调度队列，则报警
 			if(this.currentTaskItemList.size() ==0 && 
-					ScheduleUtil.getCurrentTimeMillis() - this.lastReloadTaskItemListTime
+					scheduleCenter.getSystemTime() - this.lastReloadTaskItemListTime
 					> this.taskTypeInfo.getHeartBeatRate() * 10){			
 				String message ="调度服务器" + this.currenScheduleServer.getUuid() +"[TASK_TYPE=" + this.currenScheduleServer.getTaskType() + "]自启动以来，超过10个心跳周期，还 没有获取到分配的任务队列";
 				log.warn(message);
@@ -215,7 +214,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 			
 			if(this.currentTaskItemList.size() >0){
 				 //更新时间戳
-				 this.lastReloadTaskItemListTime = ScheduleUtil.getCurrentTimeMillis();
+				 this.lastReloadTaskItemListTime = scheduleCenter.getSystemTime();
 			}
 			
 			return this.currentTaskItemList;

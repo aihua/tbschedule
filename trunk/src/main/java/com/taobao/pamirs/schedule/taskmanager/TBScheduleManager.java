@@ -124,13 +124,13 @@ abstract class TBScheduleManager implements IStrategyTask {
     				+ this.taskTypeInfo.getJudgeDeadInterval() 
     				+ ",HeartBeatRate = " + this.taskTypeInfo.getHeartBeatRate());
     	}
-    	this.currenScheduleServer = ScheduleServer.createScheduleServer(baseTaskType,ownSign,this.taskTypeInfo.getThreadNumber());
+    	this.currenScheduleServer = ScheduleServer.createScheduleServer(this.scheduleCenter,baseTaskType,ownSign,this.taskTypeInfo.getThreadNumber());
     	this.currenScheduleServer.setManagerFactoryUUID(this.factory.getUuid());
     	scheduleCenter.registerScheduleServer(this.currenScheduleServer);
     	this.mBeanName = "pamirs:name=" + "schedule.ServerMananger." +this.currenScheduleServer.getUuid();
     	this.heartBeatTimer = new Timer(this.currenScheduleServer.getTaskType() +"-" + this.currentSerialNumber +"-HeartBeat");
     	this.heartBeatTimer.schedule(new HeartBeatTimerTask(this),
-                new java.sql.Date(ScheduleUtil.getCurrentTimeMillis() + 500),
+                new java.util.Date(this.scheduleCenter.getSystemTime() + 500),
                 this.taskTypeInfo.getHeartBeatRate());
     	initial();
 	}  
@@ -214,7 +214,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 				tmpStr = tmpStr.substring("startrun:".length());
 	    	}
 			CronExpression cexpStart = new CronExpression(tmpStr);
-    		Date current = new Date( ScheduleUtil.getCurrentTimeMillis());
+    		Date current = new Date( this.scheduleCenter.getSystemTime());
     		Date firstStartTime = cexpStart.getNextValidTimeAfter(current);
     		this.heartBeatTimer.schedule(
     				new PauseOrResumeScheduleTask(this,this.heartBeatTimer,
@@ -421,7 +421,7 @@ class PauseOrResumeScheduleTask extends java.util.TimerTask {
 		try {
 			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 			this.cancel();//取消调度任务
-			Date current = new Date( ScheduleUtil.getCurrentTimeMillis());
+			Date current = new Date( this.manager.scheduleCenter.getSystemTime());
 			CronExpression cexp = new CronExpression(this.cronTabExpress);
 			Date nextTime = cexp.getNextValidTimeAfter(current);
 			if(this.type == TYPE_PAUSE){
