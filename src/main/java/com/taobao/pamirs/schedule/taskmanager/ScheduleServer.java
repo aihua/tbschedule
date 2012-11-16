@@ -82,7 +82,7 @@ public class ScheduleServer {
 
 	}
 
-	public static ScheduleServer createScheduleServer(String aBaseTaskType,
+	public static ScheduleServer createScheduleServer(IScheduleDataManager aScheduleCenter,String aBaseTaskType,
 			String aOwnSign, int aThreadNum)
 			throws Exception {
 		ScheduleServer result = new ScheduleServer();
@@ -92,7 +92,7 @@ public class ScheduleServer {
 				aBaseTaskType, aOwnSign);
 		result.ip = ScheduleUtil.getLocalIP();
 		result.hostName = ScheduleUtil.getLocalHostName();
-		result.registerTime = new Timestamp(ScheduleUtil.getCurrentTimeMillis());
+		result.registerTime = new Timestamp(aScheduleCenter.getSystemTime());
 		result.threadNum = aThreadNum;
 		result.heartBeatTime = null;
 		result.dealInfoDesc = "调度初始化";
@@ -102,8 +102,7 @@ public class ScheduleServer {
 				+ (UUID.randomUUID().toString().replaceAll("-", "")
 						.toUpperCase());
 		SimpleDateFormat DATA_FORMAT_yyyyMMdd = new SimpleDateFormat("yyMMdd");
-		String s = DATA_FORMAT_yyyyMMdd.format(new Date(ScheduleUtil
-				.getCurrentTimeMillis()));
+		String s = DATA_FORMAT_yyyyMMdd.format(new Date(aScheduleCenter.getSystemTime()));
 		result.id = Long.parseLong(s) * 100000000
 				+ Math.abs(result.uuid.hashCode() % 100000000);
 		return result;

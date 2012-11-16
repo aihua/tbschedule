@@ -43,6 +43,9 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	private String PATH_BaseTaskType;
 	private String PATH_TaskItem = "taskItem";
 	private String PATH_Server = "server";
+	private long zkBaseTime = 0;
+	private long loclaBaseTime = 0;
+	
     public ScheduleDataManager4ZK(ZKManager aZkManager) throws Exception {
     	this.zkManager = aZkManager;
     	gson = new GsonBuilder().registerTypeAdapter(Timestamp.class,new TimestampTypeAdapter()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -52,6 +55,14 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		if (this.getZooKeeper().exists(this.PATH_BaseTaskType, false) == null) {
 			ZKTools.createPath(getZooKeeper(),this.PATH_BaseTaskType, CreateMode.PERSISTENT, this.zkManager.getAcl());
 		}
+		loclaBaseTime = System.currentTimeMillis();
+        String tempPath = this.zkManager.getZooKeeper().create(this.zkManager.getRootPath() + "/systime",null, this.zkManager.getAcl(), CreateMode.EPHEMERAL_SEQUENTIAL);
+        Stat tempStat = this.zkManager.getZooKeeper().exists(tempPath, false);
+        zkBaseTime = tempStat.getCtime();
+        ZKTools.deleteTree(getZooKeeper(), tempPath);
+        if(Math.abs(this.zkBaseTime - this.loclaBaseTime) > 5000){
+        	log.fatal("请注意，Zookeeper服务器时间与本地时间相差 ： " + Math.abs(this.zkBaseTime - this.loclaBaseTime) +" ms");
+        }	
 	}	
 	
 	public ZooKeeper getZooKeeper() throws Exception {
@@ -696,7 +707,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		realPath = this.getZooKeeper().create(zkServerPath, null, this.zkManager.getAcl(),CreateMode.PERSISTENT_SEQUENTIAL);
 		server.setUuid(realPath.substring(realPath.lastIndexOf("/") + 1));
 		
-		Timestamp heartBeatTime = new Timestamp(ScheduleUtil.getCurrentTimeMillis());
+		Timestamp heartBeatTime = new Timestamp(this.getSystemTime());
 		server.setHeartBeatTime(heartBeatTime);
 		
 		String valueString = this.gson.toJson(server);		
@@ -705,8 +716,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	}
 
 	public boolean refreshScheduleServer(ScheduleServer server) throws Exception {
-		Timestamp heartBeatTime = new Timestamp(ScheduleUtil
-				.getCurrentTimeMillis());
+		Timestamp heartBeatTime = new Timestamp(this.getSystemTime());
     	String zkPath = this.PATH_BaseTaskType + "/" + server.getBaseTaskType() + "/" + server.getTaskType() 
     	    + "/" + this.PATH_Server +"/" + server.getUuid();
     	if(this.getZooKeeper().exists(zkPath, false)== null){
@@ -754,7 +764,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 
 	
 	public long getSystemTime(){
-		return System.currentTimeMillis();
+		return this.zkBaseTime + ( System.currentTimeMillis() - this.loclaBaseTime);
 	}
 
 }
