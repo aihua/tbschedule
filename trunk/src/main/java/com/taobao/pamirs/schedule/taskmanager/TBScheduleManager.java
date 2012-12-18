@@ -81,6 +81,8 @@ abstract class TBScheduleManager implements IStrategyTask {
      * 当前实际  - 上此装载时间  > intervalReloadTaskItemList，则向配置中心请求最新的任务分配情况
      */
     protected long lastReloadTaskItemListTime=0;    
+    protected boolean isNeedReloadTaskItem = true;
+
     
     private String mBeanName;
     /**
@@ -162,11 +164,17 @@ abstract class TBScheduleManager implements IStrategyTask {
 	 * 清除内存中所有的已经取得的数据和任务队列,在心态更新失败，或者发现注册中心的调度信息被删除
 	 */
 	public void clearMemoInfo(){
-		//清除内存中所有的已经取得的数据和任务队列,在心态更新失败，或者发现注册中心的调度信息被删除
-		this.currentTaskItemList.clear();
-		if(this.processor != null){
-		   this.processor.clearAllHasFetchData();
+		try {
+			// 清除内存中所有的已经取得的数据和任务队列,在心态更新失败，或者发现注册中心的调度信息被删除
+			this.currentTaskItemList.clear();
+			if (this.processor != null) {
+				this.processor.clearAllHasFetchData();
+			}
+		} finally {
+			//设置内存里面的任务数据需要重新装载
+			this.isNeedReloadTaskItem = true;
 		}
+
 	}
 	
 	public void rewriteScheduleInfo() throws Exception{
