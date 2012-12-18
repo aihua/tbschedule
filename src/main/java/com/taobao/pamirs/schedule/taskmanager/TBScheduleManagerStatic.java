@@ -15,7 +15,6 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 	 */
     protected int taskItemCount =0;
 
-    boolean isNeedReloadTaskItem = true;
     protected long lastFetchVersion = -1;
 
 	public TBScheduleManagerStatic(TBScheduleManagerFactory aFactory,
@@ -106,7 +105,8 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
         //判断是否需要重新加载任务队列，避免任务处理进程不必要的检查和等待
         boolean tmpBoolean = this.isNeedReLoadTaskItemList();
         if(tmpBoolean != this.isNeedReloadTaskItem){
-        	this.isNeedReloadTaskItem = tmpBoolean;
+        	//只要不相同，就设置需要重新装载，因为在心跳异常的时候，做了清理队列的事情，恢复后需要重新装载。
+        	this.isNeedReloadTaskItem = true;
         	rewriteScheduleInfo();
         }
         
