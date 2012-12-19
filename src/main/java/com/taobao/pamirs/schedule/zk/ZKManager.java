@@ -7,6 +7,9 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -15,7 +18,7 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 
-public class ZKManager{
+public class ZKManager implements Watcher{
 	private static transient Log log = LogFactory.getLog(ZKManager.class);
 	private ZooKeeper zk;
 	private List<ACL> acl = new ArrayList<ACL>();
@@ -29,19 +32,48 @@ public class ZKManager{
 		this.properties = aProperties;
 		this.createZooKeeper();
 	}
+	
 	private void createZooKeeper() throws Exception{
 		String authString = this.properties.getProperty(keys.userName.toString())
 				+ ":"+ this.properties.getProperty(keys.password.toString());
 		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
 				.toString()), Integer.parseInt(this.properties
 				.getProperty(keys.zkSessionTimeout.toString())),
-				new ScheduleWatcher());
+				this);
 		zk.addAuthInfo("digest", authString.getBytes());
 		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
 				DigestAuthenticationProvider.generateDigest(authString))));
 		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
 	}
-
+	
+	/**
+	 * 重新連接zookeeper
+	 * @throws Exception
+	 */
+	public synchronized void  reConnection() throws Exception{
+		if (this.zk.getState() == States.CLOSED) {
+			if (this.zk != null) {
+				this.zk.close();
+				this.zk = null;
+			}
+			this.createZooKeeper();
+		}
+	}
+	
+	public void process(WatchedEvent event) {
+		if (event.getState() == KeeperState.SyncConnected) {
+			log.info("收到ZK连接成功事件！");
+		} else if (event.getState() == KeeperState.Expired) {
+			log.error("会话超时，等待重新建立ZK连接...");
+			try {
+				reConnection();
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+			}
+		}else{
+			log.info("已经触发了" + event.getType() + "事件！" + event.getPath());
+		}
+	}
 	public void close() throws InterruptedException {
 		log.info("关闭zookeeper连接");
 		this.zk.close();

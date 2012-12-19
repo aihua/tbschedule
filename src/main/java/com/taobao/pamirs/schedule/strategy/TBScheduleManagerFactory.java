@@ -257,15 +257,19 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	 * 重启所有的服务
 	 * @throws Exception
 	 */
-    public void reStart() throws Exception{
-		if(this.timer != null){
-			 this.timer.cancel();
-			 this.timer = null;
+	public void reStart() throws Exception {
+		try {
+			if (this.timer != null) {
+				this.timer.cancel();
+				this.timer = null;
+			}
+			this.stopServer(null);
+			this.zkManager.close();
+			this.uuid = null;
+			this.init();
+		} catch (Throwable e) {
+			logger.error("重启服务失败：" + e.getMessage(), e);
 		}
-		this.stopServer(null);
-		this.zkManager.close();
-		this.uuid = null;
-		this.init();
     }
     public boolean isZookeeperInitialSucess() throws Exception{
     	return this.zkManager.checkZookeeperState();
@@ -384,7 +388,7 @@ class InitialThread extends Thread{
 				}
 			}
 			facotry.initialData();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			 log.error(e.getMessage(),e);
 		}finally{
 			facotry.lock.unlock();
