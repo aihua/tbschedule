@@ -14,7 +14,7 @@ import org.apache.zookeeper.data.Stat;
 public class ZKTools {
    public static void main(String[] args) throws Exception {
 	   List<ACL> acl = Ids.OPEN_ACL_UNSAFE;
-	   ZooKeeper zk = new ZooKeeper("localhost:2181", 3000, null);
+	   ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,new  ScheduleWatcher());
 	   String path= "/pamirs-schedule";
 	   for(String s: getTree(zk,path)){
 		   System.out.println(s);

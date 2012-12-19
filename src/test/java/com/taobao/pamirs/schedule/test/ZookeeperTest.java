@@ -13,13 +13,14 @@ import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 import org.junit.Test;
 
+import com.taobao.pamirs.schedule.zk.ScheduleWatcher;
 import com.taobao.pamirs.schedule.zk.ZKTools;
 
 public class ZookeeperTest {
 @Test
 	 public void testCloseStatus() throws Exception{
 		 ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,
-					null);
+				 new  ScheduleWatcher());
 		 int i = 1;
 		 while(true){
 			 try{
@@ -35,7 +36,7 @@ public class ZookeeperTest {
  @Test
  public void testPrint() throws Exception{
 	 ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,
-				null);
+			 new  ScheduleWatcher());
 	 StringWriter writer = new StringWriter();
 	 ZKTools.printTree(zk, "/", writer,"\n");
 	 System.out.println(writer.getBuffer().toString());
@@ -43,7 +44,7 @@ public class ZookeeperTest {
  @Test
  public void deletePath() throws Exception{
 	 ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,
-				null);
+			 new  ScheduleWatcher());
 	 zk.addAuthInfo("digest","ScheduleAdmin:password".getBytes());
 
 	 ZKTools.deleteTree(zk,"/taobao-pamirs-schedule");
@@ -54,7 +55,7 @@ public class ZookeeperTest {
 
 	@Test
 	public void testACL() throws Exception {
-		ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,null);
+		ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,new  ScheduleWatcher());
 		List<ACL> acls = new ArrayList<ACL>();
 		zk.addAuthInfo("digest","TestUser:password".getBytes());
 		acls.add(new ACL(ZooDefs.Perms.ALL,new Id("digest",DigestAuthenticationProvider.generateDigest("TestUser:password"))));
