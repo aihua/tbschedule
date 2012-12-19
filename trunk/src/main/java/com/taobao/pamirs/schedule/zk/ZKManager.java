@@ -84,7 +84,7 @@ public class ZKManager implements Watcher{
 		result.setProperty(keys.rootPath.toString(),"/taobao-pamirs-schedule/huijin");
 		result.setProperty(keys.userName.toString(),"ScheduleAdmin");
 		result.setProperty(keys.password.toString(),"password");
-		result.setProperty(keys.zkSessionTimeout.toString(),"3000");
+		result.setProperty(keys.zkSessionTimeout.toString(),"60000");
 		return result;
 	}
 	public String getRootPath(){

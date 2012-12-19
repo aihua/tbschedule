@@ -8,7 +8,7 @@
            <map>
               <entry key="zkConnectString" value="localhost:2181" />
               <entry key="rootPath" value="/taobao-pamirs-schedule/xuannan" />
-              <entry key="zkSessionTimeout" value="3000" />
+              <entry key="zkSessionTimeout" value="60000" />
               <entry key="userName" value="ScheduleAdmin" />
               <entry key="password" value="password" />
            </map>
