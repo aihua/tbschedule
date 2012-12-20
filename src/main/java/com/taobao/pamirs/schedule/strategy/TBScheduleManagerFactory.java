@@ -146,7 +146,13 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		this.lock.lock();
 		try{
 		//判断状态是否终止
-		ManagerFactoryInfo stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
+		ManagerFactoryInfo stsInfo = null;
+		try{
+			stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
+		}catch(Exception e){
+			stsInfo = new ManagerFactoryInfo();
+			stsInfo.setStart(false);
+		}
 		if(stsInfo.isStart() == false){
 			stopServer(null); //停止所有的调度任务
 			this.getScheduleStrategyManager().unRregisterManagerFactory(this);
