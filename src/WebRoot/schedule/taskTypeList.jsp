@@ -78,7 +78,7 @@ table{border-collapse:collapse}
      	<td width="120" align="center">
      		<a target="taskDetail" href="taskTypeEdit.jsp?taskType=<%=taskTypes.get(i).getBaseTaskType()%>"  style="color:#0000CD">编辑</a>
      		<a target="taskDetail" href="taskTypeDeal.jsp?action=clearTaskType&taskType=<%=taskTypes.get(i).getBaseTaskType()%>"  style="color:#0000CD">清理</a>
-     		<a target="taskDetail" onclick="deleteTaskType('<%=taskTypes.get(i).getBaseTaskType()%>');" href="taskTypeDeal.jsp?action=deleteTaskType&taskType=<%=taskTypes.get(i).getBaseTaskType()%>" style="color:#0000CD">删除</a>
+     		<a target="taskDetail" href="javascript:void(0)" onclick="validateDel('<%=taskTypes.get(i).getBaseTaskType()%>')" style="color:#0000CD">删除</a>
      	</td>
 		<%
 			}
@@ -122,7 +122,7 @@ table{border-collapse:collapse}
 	}
 %>
 运行期信息：<br/>
-<iframe  name="taskDetail"  height="80%" width="100%"></iframe>
+<iframe id="showTaskDetail" name="taskDetail"  height="80%" width="100%"></iframe>
 </body>
 </html>
 <script>
@@ -133,7 +133,7 @@ function openDetail(obj,baseTaskType){
 	}
 	obj.bgColor="#FFD700";
 	oldSelectRow = obj;
-    document.all("taskDetail").src = "taskTypeInfo.jsp?baseTaskType=" + baseTaskType;
+	document.getElementById("showTaskDetail").src = "taskTypeInfo.jsp?baseTaskType=" + baseTaskType;
 }
 
 if(list.rows.length >1){
@@ -143,5 +143,12 @@ if(list.rows.length >1){
 function deleteTaskType(baseTaskType){
 	//return window.confirm("请确认所有的调度器都已经停止，否则会导致调度器异常！");
 		
+}
+
+function validateDel(str) {
+    var flag = window.confirm("确认删除任务"+str+"?");
+    if(flag) {
+        window.location.href="taskTypeDeal.jsp?action=deleteTaskType&taskType="+str; 
+    }
 }
 </script>
