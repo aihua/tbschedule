@@ -282,7 +282,9 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	public List<ScheduleTaskType> getAllTaskTypeBaseInfo() throws Exception {
 		String zkPath = this.PATH_BaseTaskType;
 		List<ScheduleTaskType> result = new ArrayList<ScheduleTaskType>();
-		for(String name:this.getZooKeeper().getChildren(zkPath,false)){
+		List<String> names = this.getZooKeeper().getChildren(zkPath,false);
+		Collections.sort(names);
+		for(String name:names){
 			result.add(this.loadTaskTypeBaseInfo(name));
 		}
 		return result;

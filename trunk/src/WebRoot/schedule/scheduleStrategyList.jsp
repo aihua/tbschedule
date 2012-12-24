@@ -68,7 +68,7 @@ for(int i=0;i<scheduleStrategyList.size();i++){
      	<%if("true".equals(isManager)){%>
      	<td width="100" align="center">
      	    <a target="strategyDetail" href="scheduleStrategyEdit.jsp?taskType=<%=scheduleStrategy.getStrategyName()%>" style="color:#0000CD">编辑</a>
-     	    <a target="strategyDetail" href="scheduleStrategyDeal.jsp?action=deleteScheduleStrategy&strategyName=<%=scheduleStrategy.getStrategyName()%>" style="color:#0000CD">删除</a>
+     	    <a target="strategyDetail" href="javascript:void(0)" onclick="validateDel('<%=scheduleStrategy.getStrategyName()%>')">删除</a>
      		<a target="strategyDetail" href="scheduleStrategyDeal.jsp?action=<%=pauseOrResumeAction%>&strategyName=<%=scheduleStrategy.getStrategyName()%>" style="color:#0000CD"><%=pauseOrResumeActionName%></a>
      	</td>
 		<%}%>
@@ -91,7 +91,7 @@ for(int i=0;i<scheduleStrategyList.size();i++){
 <a target="strategyDetail" href="scheduleStrategyEdit.jsp?taskType=-1" style="color:#0000CD">创建新策略...</a>
 <%}%>
 任务在各个机器上的分配情况：
-<iframe  name="strategyDetail" height="80%" width="100%"></iframe>
+<iframe id="showStrategyDetail" name="strategyDetail" height="80%" width="100%"></iframe>
 </body>
 </html>
 <script>
@@ -103,10 +103,16 @@ function openDetail(obj,strategyName){
 	}
 	obj.bgColor="#FFD700";
 	oldSelectRow = obj;
-    document.all("strategyDetail").src = "scheduleStrategyRuntime.jsp?strategyName=" + strategyName;
+	document.getElementById("showStrategyDetail").src = "scheduleStrategyRuntime.jsp?strategyName=" + strategyName;
 }
 if(contentTable.rows.length >1){
 	contentTable.rows[1].click();
 }
 
+function validateDel(str) {
+    var flag = window.confirm("确认删除策略"+str+"?");
+    if(flag) {
+        window.location.href="scheduleStrategyDeal.jsp?action=deleteScheduleStrategy&strategyName="+str; 
+    }
+}
 </script>
