@@ -42,10 +42,15 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 				    	  return;
 				      }
  				      //log.error("isRuntimeInfoInitial = " + isRuntimeInfoInitial);
+ 				      try{
 					  initialRunningInfo();
 					  isRuntimeInfoInitial = scheduleCenter.isInitialRunningInfoSucuss(
 										currenScheduleServer.getBaseTaskType(),
 										currenScheduleServer.getOwnSign());
+ 				      }catch(Exception e){
+ 				    	  //忽略初始化的异常
+ 				    	  log.error(e.getMessage(),e);
+ 				      }
 					  if(isRuntimeInfoInitial == false){
     				      Thread.currentThread().sleep(1000);
 					  }
