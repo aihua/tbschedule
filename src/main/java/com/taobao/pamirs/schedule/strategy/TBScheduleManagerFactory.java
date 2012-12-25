@@ -57,6 +57,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	private String hostName;
 
 	private Timer timer;
+	private ManagerFactoryTimerTask timerTask;
 	protected Lock  lock = new ReentrantLock();
     
 	volatile String  errorMessage ="No config Zookeeper connect infomation";
@@ -115,9 +116,13 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			if (this.start == true) {
 				// 注册调度管理器
 				this.scheduleStrategyManager.registerManagerFactory(this);
-				timer = new Timer("TBScheduleManagerFactory-Timer");
-				timer.schedule(new ManagerFactoryTimerTask(this), 2000,
-						this.timerInterval);
+				if(timer == null){
+					timer = new Timer("TBScheduleManagerFactory-Timer");
+				}
+				if(timerTask == null){
+					timerTask = new ManagerFactoryTimerTask(this);
+					timer.schedule(timerTask, 2000,this.timerInterval);
+				}
 			}
 	}
 
@@ -142,32 +147,44 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		return result;
 	}
 
-	public void refresh() throws Exception{
+	public void refresh() throws Exception {
 		this.lock.lock();
-		try{
-		//判断状态是否终止
-		ManagerFactoryInfo stsInfo = null;
-		try{
-			stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
-		}catch(Exception e){
-			stsInfo = new ManagerFactoryInfo();
-			stsInfo.setStart(false);
-		}
-		if(stsInfo.isStart() == false){
-			stopServer(null); //停止所有的调度任务
-			this.getScheduleStrategyManager().unRregisterManagerFactory(this);
-		}else{
-				List<String> stopList = this.getScheduleStrategyManager()
-						.registerManagerFactory(this);
-				for (String strategyName : stopList) {
-					this.stopServer(strategyName);
-				}
-				this.assignScheduleServer();
-				this.reRunScheduleServer();
+		try {
+			// 判断状态是否终止
+			ManagerFactoryInfo stsInfo = null;
+			boolean isException = false;
+			try {
+				stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
+			} catch (Exception e) {
+				isException = true;
+				logger.error(e.getMessage(), e);
 			}
-		}finally{
+			if (isException == true) {
+				try {
+					stopServer(null); // 停止所有的调度任务
+					this.getScheduleStrategyManager().unRregisterManagerFactory(this);
+				} finally {
+					reRegisterManagerFactory();
+				}
+			} else if (stsInfo.isStart() == false) {
+				stopServer(null); // 停止所有的调度任务
+				this.getScheduleStrategyManager().unRregisterManagerFactory(
+						this);
+			} else {
+				reRegisterManagerFactory();
+			}
+		} finally {
 			this.lock.unlock();
 		}
+	}
+	public void reRegisterManagerFactory() throws Exception{
+		//重新分配调度器
+		List<String> stopList = this.getScheduleStrategyManager().registerManagerFactory(this);
+		for (String strategyName : stopList) {
+			this.stopServer(strategyName);
+		}
+		this.assignScheduleServer();
+		this.reRunScheduleServer();
 	}
 	/**
 	 * 根据策略重新分配调度任务的机器
@@ -266,8 +283,11 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	public void reStart() throws Exception {
 		try {
 			if (this.timer != null) {
-				this.timer.cancel();
-				this.timer = null;
+				if(this.timerTask != null){
+					this.timerTask.cancel();
+					this.timerTask = null;
+				}
+				this.timer.purge();
 			}
 			this.stopServer(null);
 			this.zkManager.close();
