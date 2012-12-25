@@ -119,6 +119,11 @@ public class ScheduleStrategyDataManager4ZK{
 			String zkPath = this.PATH_ManagerFactory + "/" + uuid +"$";
 			zkPath = this.getZooKeeper().create(zkPath, null, this.zkManager.getAcl(), CreateMode.EPHEMERAL_SEQUENTIAL);
 			managerFactory.setUuid(zkPath.substring(zkPath.lastIndexOf("/") + 1));
+		}else{
+			String zkPath = this.PATH_ManagerFactory + "/" + managerFactory.getUuid();
+			if(this.getZooKeeper().exists(zkPath, false)==null){
+				zkPath = this.getZooKeeper().create(zkPath, null, this.zkManager.getAcl(), CreateMode.EPHEMERAL);			
+			}
 		}
 		
 		List<String> result = new ArrayList<String>();
