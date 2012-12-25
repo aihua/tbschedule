@@ -71,7 +71,7 @@ public class ZKManager implements Watcher{
 				log.error(e.getMessage(),e);
 			}
 		}else{
-			log.info("已经触发了" + event.getType() + "事件！" + event.getPath());
+			log.info("已经触发了" + event.getType() + ":"+ event.getState() + "事件！" + event.getPath());
 		}
 	}
 	public void close() throws InterruptedException {
