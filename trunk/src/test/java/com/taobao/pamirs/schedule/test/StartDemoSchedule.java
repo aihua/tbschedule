@@ -24,6 +24,6 @@ public class StartDemoSchedule  extends UnitilsJUnit4{
 	}
 	@Test    
 	public void testRunData() throws Exception {
-		Thread.sleep(10000000);
+		Thread.sleep(100000000000000L);
 	}
 }
