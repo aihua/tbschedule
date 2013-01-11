@@ -23,9 +23,10 @@ public class ZKManager implements Watcher{
 	private ZooKeeper zk;
 	private List<ACL> acl = new ArrayList<ACL>();
 	private Properties properties;
-	
+	private boolean isCheckParentPath = true;
+
 	public enum keys {
-		zkConnectString, rootPath, userName, password, zkSessionTimeout
+		zkConnectString, rootPath, userName, password, zkSessionTimeout,isCheckParentPath
 	}
 
 	public ZKManager(Properties aProperties) throws Exception{
@@ -40,6 +41,8 @@ public class ZKManager implements Watcher{
 				.toString()), Integer.parseInt(this.properties
 				.getProperty(keys.zkSessionTimeout.toString())),
 				this);
+		
+		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
 		zk.addAuthInfo("digest", authString.getBytes());
 		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
 				DigestAuthenticationProvider.generateDigest(authString))));
@@ -96,17 +99,20 @@ public class ZKManager implements Watcher{
 	public boolean checkZookeeperState() throws Exception{
 		return zk.getState() == States.CONNECTED;
 	}
-
 	public void initial() throws Exception {
 		//当zk状态正常后才能调用
 		if(zk.exists(this.getRootPath(), false) == null){
 			ZKTools.createPath(zk, this.getRootPath(), CreateMode.PERSISTENT, acl);
-			checkParent(zk,this.getRootPath());
+			if(isCheckParentPath == true){
+			  checkParent(zk,this.getRootPath());
+			}
 			//设置版本信息
 			zk.setData(this.getRootPath(),Version.getVersion().getBytes(),-1);
 		}else{
 			//先校验父亲节点，本身是否已经是schedule的目录
-			checkParent(zk,this.getRootPath());
+			if(isCheckParentPath == true){
+			   checkParent(zk,this.getRootPath());
+			}
 			byte[] value = zk.getData(this.getRootPath(), false, null);
 			if(value == null){
 				zk.setData(this.getRootPath(),Version.getVersion().getBytes(),-1);
