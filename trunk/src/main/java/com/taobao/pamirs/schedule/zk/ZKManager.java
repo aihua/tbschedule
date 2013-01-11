@@ -88,6 +88,8 @@ public class ZKManager implements Watcher{
 		result.setProperty(keys.userName.toString(),"ScheduleAdmin");
 		result.setProperty(keys.password.toString(),"password");
 		result.setProperty(keys.zkSessionTimeout.toString(),"60000");
+		result.setProperty(keys.isCheckParentPath.toString(),"true");
+		
 		return result;
 	}
 	public String getRootPath(){
