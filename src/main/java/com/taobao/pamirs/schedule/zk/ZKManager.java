@@ -26,34 +26,26 @@ public class ZKManager implements Watcher{
 	private boolean isCheckParentPath = true;
 
 	public enum keys {
-		zkConnectString, rootPath, userName, password, zkSessionTimeout, isCheckParentPath, zkAuthCharset
+		zkConnectString, rootPath, userName, password, zkSessionTimeout, isCheckParentPath
 	}
 
 	public ZKManager(Properties aProperties) throws Exception{
 		this.properties = aProperties;
 		this.createZooKeeper();
 	}
-	
+
 	private void createZooKeeper() throws Exception{
 		String authString = this.properties.getProperty(keys.userName.toString())
 				+ ":"+ this.properties.getProperty(keys.password.toString());
-		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
-				.toString()), Integer.parseInt(this.properties
-				.getProperty(keys.zkSessionTimeout.toString())),
-				this);
-		
+		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString.toString()),
+				Integer.parseInt(this.properties.getProperty(keys.zkSessionTimeout.toString())), this);
+
 		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
-		String charset = this.properties.getProperty(keys.zkAuthCharset.toString());
-		if (charset == null) {
-			zk.addAuthInfo("digest", authString.getBytes());
-		} else {
-			zk.addAuthInfo("digest", authString.getBytes(charset));
-		}
-		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
-				DigestAuthenticationProvider.generateDigest(authString))));
+		zk.addAuthInfo("digest", authString.getBytes());
+		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest", DigestAuthenticationProvider.generateDigest(authString))));
 		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
 	}
-	
+
 	/**
 	 * �����B��zookeeper
 	 * @throws Exception
