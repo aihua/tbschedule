@@ -300,9 +300,12 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 				this.zkManager.close();
 			}
 			if (this.scheduleStrategyManager != null) {
-				ZooKeeper zk = this.scheduleStrategyManager.getZooKeeper();
-				if (zk != null) {
-					zk.close();
+				try {
+					ZooKeeper zk = this.scheduleStrategyManager.getZooKeeper();
+					if (zk != null) {
+						zk.close();
+					}
+				} catch (Exception e) {
 				}
 			}
 			this.stopServer(null);
