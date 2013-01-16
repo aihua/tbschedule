@@ -33,21 +33,24 @@ public class ZKManager implements Watcher{
 		this.properties = aProperties;
 		this.createZooKeeper();
 	}
-
+	
 	private void createZooKeeper() throws Exception{
 		String authString = this.properties.getProperty(keys.userName.toString())
 				+ ":"+ this.properties.getProperty(keys.password.toString());
-		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString.toString()),
-				Integer.parseInt(this.properties.getProperty(keys.zkSessionTimeout.toString())), this);
-
+		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
+				.toString()), Integer.parseInt(this.properties
+				.getProperty(keys.zkSessionTimeout.toString())),
+				this);
+		
 		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
 		zk.addAuthInfo("digest", authString.getBytes());
-		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest", DigestAuthenticationProvider.generateDigest(authString))));
+		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
+				DigestAuthenticationProvider.generateDigest(authString))));
 		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
 	}
-
+	
 	/**
-	 * ï¿½ï¿½ï¿½ï¿½ï¿½Bï¿½ï¿½zookeeper
+	 * ÖØÐÂßB½Ózookeeper
 	 * @throws Exception
 	 */
 	public synchronized void  reConnection() throws Exception{
@@ -62,20 +65,20 @@ public class ZKManager implements Watcher{
 	
 	public void process(WatchedEvent event) {
 		if (event.getState() == KeeperState.SyncConnected) {
-			log.info("ï¿½Õµï¿½ZKï¿½ï¿½ï¿½Ó³É¹ï¿½ï¿½Â¼ï¿½ï¿½ï¿½");
+			log.info("ÊÕµ½ZKÁ¬½Ó³É¹¦ÊÂ¼þ£¡");
 		} else if (event.getState() == KeeperState.Expired) {
-			log.error("ï¿½á»°ï¿½ï¿½Ê±ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½ZKï¿½ï¿½ï¿½ï¿½...");
+			log.error("»á»°³¬Ê±£¬µÈ´ýÖØÐÂ½¨Á¢ZKÁ¬½Ó...");
 			try {
 				reConnection();
 			} catch (Exception e) {
 				log.error(e.getMessage(),e);
 			}
 		}else{
-			log.info("ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + event.getType() + ":"+ event.getState() + "ï¿½Â¼ï¿½ï¿½ï¿½" + event.getPath());
+			log.info("ÒÑ¾­´¥·¢ÁË" + event.getType() + ":"+ event.getState() + "ÊÂ¼þ£¡" + event.getPath());
 		}
 	}
 	public void close() throws InterruptedException {
-		log.info("ï¿½Ø±ï¿½zookeeperï¿½ï¿½ï¿½ï¿½");
+		log.info("¹Ø±ÕzookeeperÁ¬½Ó");
 		this.zk.close();
 	}
 	public static Properties createProperties(){
@@ -99,16 +102,16 @@ public class ZKManager implements Watcher{
 		return zk.getState() == States.CONNECTED;
 	}
 	public void initial() throws Exception {
-		//ï¿½ï¿½zk×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½
+		//µ±zk×´Ì¬Õý³£ºó²ÅÄÜµ÷ÓÃ
 		if(zk.exists(this.getRootPath(), false) == null){
 			ZKTools.createPath(zk, this.getRootPath(), CreateMode.PERSISTENT, acl);
 			if(isCheckParentPath == true){
 			  checkParent(zk,this.getRootPath());
 			}
-			//ï¿½ï¿½ï¿½Ã°æ±¾ï¿½ï¿½Ï¢
+			//ÉèÖÃ°æ±¾ÐÅÏ¢
 			zk.setData(this.getRootPath(),Version.getVersion().getBytes(),-1);
 		}else{
-			//ï¿½ï¿½Ð£ï¿½é¸¸ï¿½×½Úµã£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½scheduleï¿½ï¿½Ä¿Â¼
+			//ÏÈÐ£Ñé¸¸Ç×½Úµã£¬±¾ÉíÊÇ·ñÒÑ¾­ÊÇscheduleµÄÄ¿Â¼
 			if(isCheckParentPath == true){
 			   checkParent(zk,this.getRootPath());
 			}
@@ -118,9 +121,9 @@ public class ZKManager implements Watcher{
 			}else{
 				String dataVersion = new String(value);
 				if(Version.isCompatible(dataVersion)==false){
-					throw new Exception("Pamirs-Scheduleï¿½ï¿½ï¿½ï¿½æ±¾ "+ Version.getVersion() +" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Zookeeperï¿½Ðµï¿½ï¿½ï¿½Ý°æ±¾ " + dataVersion );
+					throw new Exception("Pamirs-Schedule³ÌÐò°æ±¾ "+ Version.getVersion() +" ²»¼æÈÝZookeeperÖÐµÄÊý¾Ý°æ±¾ " + dataVersion );
 				}
-				log.info("ï¿½ï¿½Ç°ï¿½Ä³ï¿½ï¿½ï¿½æ±¾:" + Version.getVersion() + " ï¿½ï¿½Ý°æ±¾: " + dataVersion);
+				log.info("µ±Ç°µÄ³ÌÐò°æ±¾:" + Version.getVersion() + " Êý¾Ý°æ±¾: " + dataVersion);
 			}
 		}
 	}
@@ -154,4 +157,4 @@ public class ZKManager implements Watcher{
 		return this.zk;
 	}
 	
-	}
+}

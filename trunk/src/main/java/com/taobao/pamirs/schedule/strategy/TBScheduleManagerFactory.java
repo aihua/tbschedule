@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.ZooKeeper;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -31,6 +32,7 @@ import com.taobao.pamirs.schedule.zk.ZKManager;
  * 
  */
 public class TBScheduleManagerFactory implements ApplicationContextAware {
+
 	protected static transient Log logger = LogFactory.getLog(TBScheduleManagerFactory.class);
 	
 	private Map<String,String> zkConfig;
@@ -277,6 +279,42 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		}			
 	}
 	/**
+	 * 停止所有调度资源
+	 */
+	public void stopAll() throws Exception {
+		try {
+			lock.lock();
+			this.start = false;
+			if (this.initialThread != null) {
+				this.initialThread.stopThread();
+			}
+			if (this.timer != null) {
+				if (this.timerTask != null) {
+					this.timerTask.cancel();
+					this.timerTask = null;
+				}
+				this.timer.cancel();
+				this.timer = null;
+			}
+			if (this.zkManager != null) {
+				this.zkManager.close();
+			}
+			if (this.scheduleStrategyManager != null) {
+				ZooKeeper zk = this.scheduleStrategyManager.getZooKeeper();
+				if (zk != null) {
+					zk.close();
+				}
+			}
+			this.stopServer(null);
+			this.uuid = null;
+			logger.warn("停止服务成功！");
+		} catch (Throwable e) {
+			logger.error("停止服务失败：" + e.getMessage(), e);
+		} finally {
+			lock.unlock();
+		}
+	}
+	/**
 	 * 重启所有的服务
 	 * @throws Exception
 	 */
@@ -290,7 +328,9 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 				this.timer.purge();
 			}
 			this.stopServer(null);
-			this.zkManager.close();
+			if (this.zkManager != null) {
+				this.zkManager.close();
+			}
 			this.uuid = null;
 			this.init();
 		} catch (Throwable e) {
