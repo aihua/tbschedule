@@ -296,6 +296,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 				this.timer.cancel();
 				this.timer = null;
 			}
+			this.stopServer(null);
 			if (this.zkManager != null) {
 				this.zkManager.close();
 			}
@@ -308,7 +309,6 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 				} catch (Exception e) {
 				}
 			}
-			this.stopServer(null);
 			this.uuid = null;
 			logger.warn("停止服务成功！");
 		} catch (Throwable e) {
