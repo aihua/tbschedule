@@ -39,6 +39,8 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	
 	protected ZKManager zkManager;
 
+
+
 	/**
 	 * 是否启动调度管理，如果只是做系统管理，应该设置为false
 	 */
@@ -144,7 +146,10 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,scheduleDataManager);
 		}else if(ScheduleStrategy.Kind.Java == strategy.getKind()){
 		    result=(IStrategyTask)Class.forName(strategy.getTaskName()).newInstance();
-		    result.initialTaskParameter(strategy.getTaskParameter());
+		    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+		}else if(ScheduleStrategy.Kind.Bean == strategy.getKind()){
+		    result=(IStrategyTask)this.getBean(strategy.getTaskName());
+		    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
 		}
 		return result;
 	}
@@ -230,7 +235,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			while(list.size() > run.getRequestNum() && list.size() >0){
 				IStrategyTask task  =  list.remove(list.size() - 1);
 					try {
-						task.stop();
+						task.stop(run.getStrategyName());
 					} catch (Throwable e) {
 						logger.error("注销任务错误：" + e.getMessage(), e);
 					}
@@ -256,7 +261,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			for (String name : nameList) {
 				for (IStrategyTask task : this.managerMap.get(name)) {
 					try{
-					  task.stop();
+					  task.stop(strategyName);
 					}catch(Throwable e){
 					  logger.error("注销任务错误："+e.getMessage(),e);
 					}
@@ -268,7 +273,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			if(list != null){
 				for(IStrategyTask task:list){
 					try {
-						task.stop();
+						task.stop(strategyName);
 					} catch (Throwable e) {
 						logger.error("注销任务错误：" + e.getMessage(), e);
 					}
@@ -394,7 +399,9 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	public void setZkConfig(Map<String,String> zkConfig) {
 		this.zkConfig = zkConfig;
 	}
-
+	public ZKManager getZkManager() {
+		return this.zkManager;
+	}
 	public Map<String,String> getZkConfig() {
 		return zkConfig;
 	}
