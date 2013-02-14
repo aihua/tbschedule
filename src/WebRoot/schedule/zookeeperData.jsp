@@ -9,9 +9,13 @@ if(ConsoleManager.isInitial() == false){
 <html>
 <body style="font-size:12px;">
 <%
+  String path = request.getParameter("path");
+  if(path == null){
+	  path = ConsoleManager.getScheduleStrategyManager().getRootPath();
+  }
   StringWriter writer = new StringWriter();
   ConsoleManager.getScheduleStrategyManager().printTree(
-  ConsoleManager.getScheduleStrategyManager().getRootPath(),writer,"<br/>");
+		  path,writer,"<br/>");
 %>
 <pre>
 <%=writer.getBuffer().toString()%>
