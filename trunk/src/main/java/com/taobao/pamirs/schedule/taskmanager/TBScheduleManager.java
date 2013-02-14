@@ -150,7 +150,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 		return this.currenScheduleServer.getTaskType();
 	}
 	
-	public void initialTaskParameter(String taskParameter){
+	public void initialTaskParameter(String strategyName,String taskParameter){
 	   //没有实现的方法，需要的参数直接从任务配置中读取	
 	}
 	private static synchronized int serialNumber() {
@@ -328,7 +328,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 	 * 需要注意的是，这个方法必须在当前任务处理完毕后才能执行
 	 * @throws Exception 
 	 */
-	public void stop() throws Exception{
+	public void stop(String strategyName) throws Exception{
 		if(log.isDebugEnabled()){
 			log.debug("停止服务器 ：" + this.currenScheduleServer.getUuid());
 		}
