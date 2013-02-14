@@ -11,13 +11,13 @@ public class JavaTaskDemo implements IStrategyTask,Runnable {
 
     private String parameter;
     private boolean stop = false;
-	public void initialTaskParameter(String taskParameter) {
+	public void initialTaskParameter(String strategyName,String taskParameter) {
 		parameter = taskParameter;
 		new Thread(this).start();
 	}
 
 	@Override
-	public void stop() throws Exception {
+	public void stop(String strategyName) throws Exception {
 		this.stop = true;
 	}
 
