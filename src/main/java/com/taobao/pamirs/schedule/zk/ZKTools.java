@@ -6,23 +6,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 
 public class ZKTools {
-   public static void main(String[] args) throws Exception {
-	   List<ACL> acl = Ids.OPEN_ACL_UNSAFE;
-	   ZooKeeper zk = new ZooKeeper("localhost:2181", 3000,new  ScheduleWatcher());
-	   String path= "/pamirs-schedule";
-	   for(String s: getTree(zk,path)){
-		   System.out.println(s);
-	   }
-	   //deleteTree(zk,path);
-	   createPath(zk,"/dd/aa/bb",CreateMode.PERSISTENT,acl);
- }
-
 	public static void createPath(ZooKeeper zk, String path,CreateMode createMode, List<ACL> acl) throws Exception {
 		String[] list = path.split("/");
 		String zkPath = "";
