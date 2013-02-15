@@ -7,9 +7,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -18,13 +16,13 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 
-public class ZKManager implements Watcher{
+public class ZKManager{
 	private static transient Log log = LogFactory.getLog(ZKManager.class);
 	private ZooKeeper zk;
 	private List<ACL> acl = new ArrayList<ACL>();
 	private Properties properties;
 	private boolean isCheckParentPath = true;
-
+	private ScheduleWatcher watcher = new ScheduleWatcher(this);
 	public enum keys {
 		zkConnectString, rootPath, userName, password, zkSessionTimeout, isCheckParentPath
 	}
@@ -40,7 +38,7 @@ public class ZKManager implements Watcher{
 		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
 				.toString()), Integer.parseInt(this.properties
 				.getProperty(keys.zkSessionTimeout.toString())),
-				this);
+				watcher);
 		
 		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
 		zk.addAuthInfo("digest", authString.getBytes());
@@ -48,7 +46,9 @@ public class ZKManager implements Watcher{
 				DigestAuthenticationProvider.generateDigest(authString))));
 		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
 	}
-	
+	public void registerChildrenChanged(String path,Watcher watcher) throws Exception{
+		this.watcher.registerChildrenChanged(path, watcher);
+	}
 	/**
 	 * 重新連接zookeeper
 	 * @throws Exception
@@ -63,20 +63,6 @@ public class ZKManager implements Watcher{
 		}
 	}
 	
-	public void process(WatchedEvent event) {
-		if (event.getState() == KeeperState.SyncConnected) {
-			log.info("收到ZK连接成功事件！");
-		} else if (event.getState() == KeeperState.Expired) {
-			log.error("会话超时，等待重新建立ZK连接...");
-			try {
-				reConnection();
-			} catch (Exception e) {
-				log.error(e.getMessage(),e);
-			}
-		}else{
-			log.info("已经触发了" + event.getType() + ":"+ event.getState() + "事件！" + event.getPath());
-		}
-	}
 	public void close() throws InterruptedException {
 		log.info("关闭zookeeper连接");
 		this.zk.close();
