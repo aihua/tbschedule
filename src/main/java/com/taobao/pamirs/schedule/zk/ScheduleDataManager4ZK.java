@@ -424,10 +424,12 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType + "/" + taskType + "/" + this.PATH_TaskItem;
 		 return this.getZooKeeper().getChildren(zkPath, false).size();
 	}
+	
 	public void clearExpireTaskTypeRunningInfo(String baseTaskType,String serverUUID, double expireDateInternal) throws Exception {
 		for (String name : this.getZooKeeper().getChildren(this.PATH_BaseTaskType + "/" + baseTaskType, false)) {
-			Stat stat = this.getZooKeeper().exists(this.PATH_BaseTaskType + "/" + baseTaskType + "/" + name, false);
-			if (getSystemTime() - stat.getMtime() > (long) (expireDateInternal * 24 * 3600 * 1000)) {
+			String zkPath = this.PATH_BaseTaskType+"/"+ baseTaskType +"/" + name +"/" + this.PATH_TaskItem;
+			Stat stat = this.getZooKeeper().exists(zkPath, false);
+			if (stat == null || getSystemTime() - stat.getMtime() > (long) (expireDateInternal * 24 * 3600 * 1000)) {
 				ZKTools.deleteTree(this.getZooKeeper(),this.PATH_BaseTaskType +"/" + baseTaskType + "/" + name);
 			}
 		}
