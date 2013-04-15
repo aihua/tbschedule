@@ -1,5 +1,6 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
+import java.lang.reflect.Array;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -190,7 +191,7 @@ class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 			if (result.size() == 0) {
 				return null;
 			} else {
-				return (T[]) result.toArray();
+				return (T[]) result.toArray((T[]) Array.newInstance(result.get(0).getClass(),0));
 			}
 		} finally {
 			lockFetchMutilID.unlock();

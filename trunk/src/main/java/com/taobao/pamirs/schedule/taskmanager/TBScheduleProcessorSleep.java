@@ -1,5 +1,6 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
+import java.lang.reflect.Array;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,7 +122,11 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 		       }
 		       int size = taskList.size() > taskTypeInfo.getExecuteNumber() ? taskTypeInfo.getExecuteNumber()
 						: taskList.size();
-		       Object[] result = new Object[size];
+		       
+		       Object[] result = null;
+		       if(size >0){
+		    	   result =(Object[])Array.newInstance(this.taskList.get(0).getClass(),size);
+		       }
 		       for(int i=0;i<size;i++){
 		      	 result[i] = this.taskList.remove(0);  // 按正序处理
 		       }
