@@ -138,8 +138,7 @@ public class ZKManager{
 	}
 	public ZooKeeper getZooKeeper() throws Exception {
 		if(this.checkZookeeperState()==false){
-//			this.zk = null;
-			createZooKeeper();
+			reConnection();
 			if(this.checkZookeeperState()==false){
 				throw new Exception("Zookeeper["+ this.getConnectStr()+"] connect error :" + this.zk.getState() );
 			}
