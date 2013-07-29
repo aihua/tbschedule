@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooDefs.Ids;
@@ -144,6 +145,26 @@ public class ZKManager{
 			}
 		}
 		return this.zk;
+	}
+	
+	/**
+	 * 封装zookeeper获取数据方法
+	 * 
+	 */
+	public byte[] getData(String path) throws Exception {
+		byte[] data = null;
+		try {
+			data = getZooKeeper().getData(path, false, null);
+		} catch (Exception e) {
+			//需要处理zookeeper session过期异常
+			if (e instanceof KeeperException
+					&& ((KeeperException) e).code().intValue() == KeeperException.Code.SESSIONEXPIRED.intValue()) {
+				log.warn("getData : zookeeper session已经过期，需要重新连接zookeeper");
+				reConnection();
+				data = getZooKeeper().getData(path, false, null);
+			}
+		}
+		return data;
 	}
 	
 }
