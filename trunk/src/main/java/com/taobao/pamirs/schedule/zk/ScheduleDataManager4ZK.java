@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
@@ -112,7 +113,17 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 String taskType = ScheduleUtil.getTaskTypeByBaseAndOwnSign(baseTaskType, ownSign);
 		 //清除所有的老信息，只有leader能执行此操作
 		 String zkPath = this.PATH_BaseTaskType+"/"+ baseTaskType +"/" + taskType+"/" + this.PATH_TaskItem;
-		 ZKTools.deleteTree(this.getZooKeeper(),zkPath);
+		 try {
+			 ZKTools.deleteTree(this.getZooKeeper(),zkPath);
+		 } catch (Exception e) {
+				//需要处理zookeeper session过期异常
+				if (e instanceof KeeperException
+						&& ((KeeperException) e).code().intValue() == KeeperException.Code.SESSIONEXPIRED.intValue()) {
+					log.warn("delete : zookeeper session已经过期，需要重新连接zookeeper");
+					zkManager.reConnection();
+					ZKTools.deleteTree(this.getZooKeeper(),zkPath);
+				}
+		 }
 		 //创建目录
 		 this.getZooKeeper().create(zkPath,null, this.zkManager.getAcl(),CreateMode.PERSISTENT);
 		 //创建静态任务
@@ -405,8 +416,8 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType + "/" + taskType + "/" + this.PATH_TaskItem;
 		 boolean isModify = false;
 		 for(String name:this.getZooKeeper().getChildren(zkPath, false)){
-			byte[] curServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
-			byte[] reqServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/req_server",false,null);
+			byte[] curServerValue = this.zkManager.getData(zkPath + "/" + name + "/cur_server");
+			byte[] reqServerValue = this.zkManager.getData(zkPath + "/" + name + "/req_server");
 			if(reqServerValue != null && curServerValue != null && uuid.equals(new String(curServerValue))==true){
 				this.getZooKeeper().setData(zkPath + "/" + name + "/cur_server",reqServerValue,-1);
 				this.getZooKeeper().setData(zkPath + "/" + name + "/req_server",null,-1);		
