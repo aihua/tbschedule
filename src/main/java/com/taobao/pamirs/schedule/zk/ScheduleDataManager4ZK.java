@@ -141,7 +141,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
     	String leader = this.getLeader(this.loadScheduleServerNames(taskType));
     	String zkPath = this.PATH_BaseTaskType+"/"+ baseTaskType +"/" + taskType+"/"+ this.PATH_TaskItem;
 		if(this.getZooKeeper().exists(zkPath, false) != null){
-			byte[] curContent = this.getZooKeeper().getData(zkPath,false,null);
+			byte[] curContent = this.zkManager.getData(zkPath);
 			if(curContent != null && new String(curContent).equals(leader)){
 				return true;
 			}
@@ -253,23 +253,23 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			info.setTaskType(taskType);
 			info.setTaskItem(taskItem);
 			String zkTaskItemPath = zkPath + "/" + taskItem;
-			byte[] curContent = this.getZooKeeper().getData(zkTaskItemPath+"/cur_server",false,null);
+			byte[] curContent = this.zkManager.getData(zkTaskItemPath+"/cur_server");
 			if(curContent != null){
 			    info.setCurrentScheduleServer(new String(curContent));
 			}
-			byte[] reqContent = this.getZooKeeper().getData(zkTaskItemPath+"/req_server",false,null);
+			byte[] reqContent = this.zkManager.getData(zkTaskItemPath+"/req_server");
 			if(reqContent != null){
 			    info.setRequestScheduleServer(new String(reqContent));
 			}
-			byte[] stsContent = this.getZooKeeper().getData(zkTaskItemPath+"/sts",false,null);
+			byte[] stsContent = this.zkManager.getData(zkTaskItemPath+"/sts");
 			if(stsContent != null){
 			    info.setSts(ScheduleTaskItem.TaskItemSts.valueOf(new String(stsContent)));
 			}
-			byte[] parameterContent = this.getZooKeeper().getData(zkTaskItemPath+"/parameter",false,null);
+			byte[] parameterContent = this.zkManager.getData(zkTaskItemPath+"/parameter");
 			if(parameterContent != null){
 			    info.setDealParameter(new String(parameterContent));
 			}
-			byte[] dealDescContent = this.getZooKeeper().getData(zkTaskItemPath+"/deal_desc",false,null);
+			byte[] dealDescContent = this.zkManager.getData(zkTaskItemPath+"/deal_desc");
 			if(dealDescContent != null){
 			    info.setDealDesc(new String(dealDescContent));
 			}
@@ -284,7 +284,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		if(this.getZooKeeper().exists(zkPath, false) == null){
 			return null;
 		}
-		String valueString= new String(this.getZooKeeper().getData(zkPath, false,null));
+		String valueString= new String(this.zkManager.getData(zkPath));
 		ScheduleTaskType result = (ScheduleTaskType)this.gson.fromJson(valueString, ScheduleTaskType.class);
 		return result;
 	}
@@ -396,11 +396,11 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 
 		 List<TaskItemDefine> result = new ArrayList<TaskItemDefine>();
 		 for(String name:taskItems){
-			byte[] value = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
+			byte[] value = this.zkManager.getData(zkPath + "/" + name + "/cur_server");
 			if(value != null && uuid.equals(new String(value))){
 				TaskItemDefine item = new TaskItemDefine();
 				item.setTaskItemId(name);
-				byte[] parameterValue = this.getZooKeeper().getData(zkPath + "/" + name + "/parameter",false,null);
+				byte[] parameterValue = this.zkManager.getData(zkPath + "/" + name + "/parameter");
 				if(parameterValue != null){
 					item.setParameter(new String(parameterValue));
 				}
@@ -481,7 +481,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 
 		 int result =0;
 		 for(String name:this.getZooKeeper().getChildren(zkPath, false)){
-			byte[] curServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
+			byte[] curServerValue = this.zkManager.getData(zkPath + "/" + name + "/cur_server");
 			if(curServerValue != null){
 			   String curServer = new String(curServerValue);
 			   boolean isFind = false;
@@ -535,7 +535,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			});
 		for(String name:serverList){
 			try{
-			String valueString= new String(this.getZooKeeper().getData(zkPath + "/"+ name, false,null));
+			String valueString= new String(this.zkManager.getData(zkPath + "/"+ name));
 			ScheduleServer server = (ScheduleServer)this.gson.fromJson(valueString,ScheduleServer.class);
 			server.setCenterServerTime(new Timestamp(this.getSystemTime()));
 			result.add(server);
@@ -553,7 +553,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			for(String taskType: this.getZooKeeper().getChildren(this.PATH_BaseTaskType+"/"+baseTaskType,false)){
 				String zkPath =  this.PATH_BaseTaskType+"/"+baseTaskType+"/"+taskType+"/"+this.PATH_Server;
 				for(String uuid: this.getZooKeeper().getChildren(zkPath,false)){
-					String valueString= new String(this.getZooKeeper().getData(zkPath + "/"+ uuid, false,null));
+					String valueString= new String(this.zkManager.getData(zkPath + "/"+ uuid));
 					ScheduleServer server = (ScheduleServer)this.gson.fromJson(valueString,ScheduleServer.class);
 					server.setCenterServerTime(new Timestamp(this.getSystemTime()));
 					if (server.getManagerFactoryUUID().equals(factoryUUID)) {
@@ -631,8 +631,8 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			if(point < taskServerList.size() ){
 				serverName = taskServerList.get(point);
 			}
-			byte[] curServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
-			byte[] reqServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/req_server",false,null);
+			byte[] curServerValue = this.zkManager.getData(zkPath + "/" + name + "/cur_server");
+			byte[] reqServerValue = this.zkManager.getData(zkPath + "/" + name + "/req_server");
 			
 			if(curServerValue == null || new String(curServerValue).equals(NO_SERVER_DEAL)){
 				this.getZooKeeper().setData(zkPath + "/" + name + "/cur_server",serverName.getBytes(),-1);
@@ -678,8 +678,8 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 Collections.sort(children);
 		 int unModifyCount =0;
 		 for(String name:children){
-			byte[] curServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
-			byte[] reqServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/req_server",false,null);
+			byte[] curServerValue = this.zkManager.getData(zkPath + "/" + name + "/cur_server");
+			byte[] reqServerValue = this.zkManager.getData(zkPath + "/" + name + "/req_server");
 			if(curServerValue == null){
 				this.getZooKeeper().setData(zkPath + "/" + name + "/cur_server",serverList.get(point).getBytes(),-1);
 				this.getZooKeeper().setData(zkPath + "/" + name + "/req_server",null,-1);
