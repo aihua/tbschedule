@@ -7,7 +7,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.KeeperException.ConnectionLossException;
+import org.apache.zookeeper.KeeperException.SessionExpiredException;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooDefs.Ids;
@@ -156,21 +157,12 @@ public class ZKManager{
 		try {
 			data = getZooKeeper().getData(path, false, null);
 		} catch (Exception e) {
-			//需要处理zookeeper session过期异常
-			if (e instanceof KeeperException
-					&& ((KeeperException) e).code().intValue() == KeeperException.Code.SESSIONEXPIRED.intValue()) {
-				log.warn("getData : zookeeper session已经过期，需要重新连接zookeeper");
+			//需要处理zookeeper session过期和connectionLoss异常
+			if (e instanceof SessionExpiredException || e instanceof ConnectionLossException) {
+				log.warn("getData : session expired or connection loss，需要重新连接zookeeper");
 				reConnection();
 				data = getZooKeeper().getData(path, false, null);
 			}
-			//需要处理zookeeper connectionLoss过期异常
-			if (e instanceof KeeperException
-					&& ((KeeperException) e).code().intValue() == KeeperException.Code.CONNECTIONLOSS.intValue()) {
-				log.warn("getData : zookeeper connectionLoss，需要重新连接zookeeper");
-				reConnection();
-				data = getZooKeeper().getData(path, false, null);
-			}
-			
 		}
 		return data;
 	}
