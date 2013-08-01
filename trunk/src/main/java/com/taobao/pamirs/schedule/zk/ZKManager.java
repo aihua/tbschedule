@@ -163,6 +163,14 @@ public class ZKManager{
 				reConnection();
 				data = getZooKeeper().getData(path, false, null);
 			}
+			//需要处理zookeeper connectionLoss过期异常
+			if (e instanceof KeeperException
+					&& ((KeeperException) e).code().intValue() == KeeperException.Code.CONNECTIONLOSS.intValue()) {
+				log.warn("getData : zookeeper connectionLoss，需要重新连接zookeeper");
+				reConnection();
+				data = getZooKeeper().getData(path, false, null);
+			}
+			
 		}
 		return data;
 	}
