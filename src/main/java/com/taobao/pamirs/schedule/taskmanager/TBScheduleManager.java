@@ -440,7 +440,7 @@ class PauseOrResumeScheduleTask extends java.util.TimerTask {
 				this.manager.getScheduleServer().setNextRunStartTime(ScheduleUtil.transferDataToString(nextTime));
 			}
 			this.timer.schedule(new PauseOrResumeScheduleTask(this.manager,this.timer,this.type,this.cronTabExpress) , nextTime);
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
 		}
 	}

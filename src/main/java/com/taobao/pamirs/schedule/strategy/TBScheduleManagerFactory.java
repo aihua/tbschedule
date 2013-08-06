@@ -431,7 +431,7 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 				count = 0;
 			    this.factory.refresh();
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
 		}
 	}

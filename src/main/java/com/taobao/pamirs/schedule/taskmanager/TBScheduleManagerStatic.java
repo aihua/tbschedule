@@ -47,7 +47,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 					  isRuntimeInfoInitial = scheduleCenter.isInitialRunningInfoSucuss(
 										currenScheduleServer.getBaseTaskType(),
 										currenScheduleServer.getOwnSign());
- 				      }catch(Exception e){
+ 				      }catch(Throwable e){
  				    	  //忽略初始化的异常
  				    	  log.error(e.getMessage(),e);
  				      }
