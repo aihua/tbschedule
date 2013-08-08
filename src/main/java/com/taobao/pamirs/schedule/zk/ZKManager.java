@@ -56,12 +56,19 @@ public class ZKManager{
 	 * @throws Exception
 	 */
 	public synchronized void  reConnection() throws Exception{
+		log.error("zk连接状态" + zk.getState() + " ,开始重连...");
 		if (this.zk.getState() == States.CLOSED) {
 			if (this.zk != null) {
 				this.zk.close();
 				this.zk = null;
 			}
+			log.error(zk.getState() + " ,zk连接已关闭，开始重新创建连接...");
 			this.createZooKeeper();
+			Thread.sleep(2000);
+		} 
+		if (this.zk.getState() == States.CONNECTING) {
+			log.error(zk.getState() + " ,正在连接中...");
+			Thread.sleep(2000);
 		}
 	}
 	
@@ -159,7 +166,7 @@ public class ZKManager{
 		} catch (Exception e) {
 			//需要处理zookeeper session过期和connectionLoss异常
 			if (e instanceof SessionExpiredException || e instanceof ConnectionLossException) {
-				log.warn("getData : session expired or connection loss，需要重新连接zookeeper");
+				log.error("getData : session expired or connection loss，需要重新连接zookeeper");
 				reConnection();
 				data = getZooKeeper().getData(path, false, null);
 			}
