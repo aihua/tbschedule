@@ -56,17 +56,15 @@ public class ZKManager{
 	 * @throws Exception
 	 */
 	public synchronized void  reConnection() throws Exception{
-		log.error("zk连接状态" + zk.getState() + " ,开始重连...");
-		if (this.zk.getState() == States.CLOSED) {
+		if (this.zk == null || this.zk.getState() == States.CLOSED) {
+			log.error("zk连接已关闭，开始重新创建连接...");
 			if (this.zk != null) {
 				this.zk.close();
 				this.zk = null;
 			}
-			log.error(zk.getState() + " ,zk连接已关闭，开始重新创建连接...");
 			this.createZooKeeper();
 			Thread.sleep(2000);
-		} 
-		if (this.zk.getState() == States.CONNECTING) {
+		} else if (this.zk.getState() == States.CONNECTING) {
 			log.error(zk.getState() + " ,正在连接中...");
 			Thread.sleep(2000);
 		}
@@ -94,7 +92,7 @@ public class ZKManager{
 		return this.properties.getProperty(keys.zkConnectString.toString());
 	}
 	public boolean checkZookeeperState() throws Exception{
-		return zk.getState() == States.CONNECTED;
+		return zk != null && zk.getState() == States.CONNECTED;
 	}
 	public void initial() throws Exception {
 		//当zk状态正常后才能调用

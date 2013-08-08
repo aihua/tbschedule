@@ -249,6 +249,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 					this.currenScheduleServer.setNextRunEndTime(ScheduleUtil.transferDataToString(firstEndTime));
 				} catch (Exception e) {
 					log.error("计算第一次执行时间出现异常:" + currenScheduleServer.getUuid(), e);
+					throw new Exception("计算第一次执行时间出现异常:" + currenScheduleServer.getUuid(), e);
 				}
 			}
     	}
