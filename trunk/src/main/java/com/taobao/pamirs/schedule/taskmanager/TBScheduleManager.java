@@ -233,19 +233,23 @@ abstract class TBScheduleManager implements IStrategyTask {
     		   || this.taskTypeInfo.getPermitRunEndTime().equals("-1")){
 				this.currenScheduleServer.setNextRunEndTime("当不能获取到数据的时候pause");				
 			}else{
-				String tmpEndStr = this.taskTypeInfo.getPermitRunEndTime();
-				CronExpression cexpEnd = new CronExpression(tmpEndStr);
-				Date firstEndTime = cexpEnd.getNextValidTimeAfter(firstStartTime);
-				Date nowEndTime = cexpEnd.getNextValidTimeAfter(current);
-				if(!nowEndTime.equals(firstEndTime) && current.before(nowEndTime)){
-					isRunNow = true;
-					firstEndTime = nowEndTime;
+				try {
+					String tmpEndStr = this.taskTypeInfo.getPermitRunEndTime();
+					CronExpression cexpEnd = new CronExpression(tmpEndStr);
+					Date firstEndTime = cexpEnd.getNextValidTimeAfter(firstStartTime);
+					Date nowEndTime = cexpEnd.getNextValidTimeAfter(current);
+					if(!nowEndTime.equals(firstEndTime) && current.before(nowEndTime)){
+						isRunNow = true;
+						firstEndTime = nowEndTime;
+					}
+					this.heartBeatTimer.schedule(
+		    				new PauseOrResumeScheduleTask(this,this.heartBeatTimer,
+		    						PauseOrResumeScheduleTask.TYPE_PAUSE,tmpEndStr), 
+		    						firstEndTime);
+					this.currenScheduleServer.setNextRunEndTime(ScheduleUtil.transferDataToString(firstEndTime));
+				} catch (Exception e) {
+					log.error("计算第一次执行时间出现异常:" + currenScheduleServer.getUuid(), e);
 				}
-				this.heartBeatTimer.schedule(
-	    				new PauseOrResumeScheduleTask(this,this.heartBeatTimer,
-	    						PauseOrResumeScheduleTask.TYPE_PAUSE,tmpEndStr), 
-	    						firstEndTime);
-				this.currenScheduleServer.setNextRunEndTime(ScheduleUtil.transferDataToString(firstEndTime));	
 			}
     	}
     	if(isRunNow == true){
