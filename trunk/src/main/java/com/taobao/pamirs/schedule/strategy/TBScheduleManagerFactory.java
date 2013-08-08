@@ -227,7 +227,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			return true;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			return false;
+			return true;
 		}
 	}	
 	
