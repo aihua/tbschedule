@@ -216,15 +216,21 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	}
 	
 	public boolean isLeader(String uuid, List<ScheduleStrategyRunntime> factoryList) {
-		long no = Long.parseLong(uuid.substring(uuid.lastIndexOf("$") + 1));
-		for (ScheduleStrategyRunntime server : factoryList) {
-			if (no > Long.parseLong(server.getUuid().substring(
-					server.getUuid().lastIndexOf("$") + 1))) {
-				return false;
+		try {
+			long no = Long.parseLong(uuid.substring(uuid.lastIndexOf("$") + 1));
+			for (ScheduleStrategyRunntime server : factoryList) {
+				if (no > Long.parseLong(server.getUuid().substring(
+						server.getUuid().lastIndexOf("$") + 1))) {
+					return false;
+				}
 			}
+			return true;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return false;
 		}
-		return true;
 	}	
+	
 	public void reRunScheduleServer() throws Exception{
 		for (ScheduleStrategyRunntime run : this.scheduleStrategyManager.loadAllScheduleStrategyRunntimeByUUID(this.uuid)) {
 			List<IStrategyTask> list = this.managerMap.get(run.getStrategyName());
