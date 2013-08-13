@@ -36,7 +36,7 @@ public class ZKManager{
 	}
 	
 	/**
-	 * 重新連接zookeeper
+	 * 重连zookeeper
 	 * @throws Exception
 	 */
 	public synchronized void  reConnection() throws Exception{
@@ -48,45 +48,41 @@ public class ZKManager{
 	}
 	
 	private void connect() throws Exception {
-		final CountDownLatch connectionLatch = new CountDownLatch(1);
-		final CountDownLatch assignLatch = new CountDownLatch(1);
-		String authString = this.properties.getProperty(keys.userName.toString())
-				+ ":"+ this.properties.getProperty(keys.password.toString());
+		CountDownLatch connectionLatch = new CountDownLatch(1);
+		createZookeeper(connectionLatch);
+		connectionLatch.await();
+	}
+	
+	private void createZookeeper(final CountDownLatch connectionLatch) throws Exception {
 		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
 				.toString()), Integer.parseInt(this.properties
 				.getProperty(keys.zkSessionTimeout.toString())),
 				new Watcher() {
 					public void process(WatchedEvent event) {
-						sessionEvent(assignLatch, connectionLatch, event);
+						sessionEvent(connectionLatch, event);
 					}
 				});
+		String authString = this.properties.getProperty(keys.userName.toString())
+				+ ":"+ this.properties.getProperty(keys.password.toString());
 		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
 		zk.addAuthInfo("digest", authString.getBytes());
 		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
 				DigestAuthenticationProvider.generateDigest(authString))));
 		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
-		assignLatch.countDown();
-		connectionLatch.await();
 	}
 	
-	private void sessionEvent(CountDownLatch assignLatch, CountDownLatch connectionLatch,
-			WatchedEvent event) {
-		try {
-			assignLatch.await();
-			if (event.getState() == KeeperState.SyncConnected) {
-				log.info("收到ZK连接成功事件！");
-				connectionLatch.countDown();
-			} else if (event.getState() == KeeperState.Expired) {
-				log.error("会话超时，等待重新建立ZK连接...");
-				try {
-					reConnection();
-				} catch (Exception e) {
-					log.error(e.getMessage(),e);
-				}
-			} // Disconnected：Zookeeper会自动处理Disconnected状态重连
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+	private void sessionEvent(CountDownLatch connectionLatch, WatchedEvent event) {
+		if (event.getState() == KeeperState.SyncConnected) {
+			log.info("收到ZK连接成功事件！");
+			connectionLatch.countDown();
+		} else if (event.getState() == KeeperState.Expired) {
+			log.error("会话超时，等待重新建立ZK连接...");
+			try {
+				reConnection();
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+			}
+		} // Disconnected：Zookeeper会自动处理Disconnected状态重连
 	}
 	
 	public void close() throws InterruptedException {
