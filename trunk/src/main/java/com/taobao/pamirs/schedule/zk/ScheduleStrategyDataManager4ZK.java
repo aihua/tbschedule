@@ -47,7 +47,7 @@ public class ScheduleStrategyDataManager4ZK{
 		if(this.getZooKeeper().exists(zkPath, false) == null){
 			return null;
 		}
-		String valueString= new String(this.zkManager.getData(zkPath));
+		String valueString= new String(this.getZooKeeper().getData(zkPath,false,null));
 		ScheduleStrategy result = (ScheduleStrategy)this.gson.fromJson(valueString, ScheduleStrategy.class);
 		return result;
 	}
@@ -171,9 +171,9 @@ public class ScheduleStrategyDataManager4ZK{
 		String zkPath =	this.PATH_Strategy +"/"+strategyName+"/"+uuid;
 		ScheduleStrategyRunntime result = null;
 		if(this.getZooKeeper().exists(zkPath, false) !=null){
-			byte[] value = this.zkManager.getData(zkPath);
+			byte[] value = this.getZooKeeper().getData(zkPath,false,null);
 			if (value != null) {
-				String valueString = new String(this.zkManager.getData(zkPath));
+				String valueString = new String(this.getZooKeeper().getData(zkPath,false,null));
 				result = (ScheduleStrategyRunntime) this.gson.fromJson(valueString, ScheduleStrategyRunntime.class);
 			}else{
 				result = new ScheduleStrategyRunntime();
@@ -295,7 +295,7 @@ public class ScheduleStrategyDataManager4ZK{
 		if(this.getZooKeeper().exists(zkPath, false)==null){
 			throw new Exception("任务管理器不存在:" + uuid);
 		}
-		byte[] value = this.zkManager.getData(zkPath);
+		byte[] value = this.getZooKeeper().getData(zkPath,false,null);
 		ManagerFactoryInfo result = new ManagerFactoryInfo();
 		result.setUuid(uuid);
 		if(value== null){
@@ -359,8 +359,7 @@ public class ScheduleStrategyDataManager4ZK{
 			for (int i = 0; i < fNodeList.size(); i++) {
 				String fNode = fNodeList.get(i);
 				ConfigNode configNode = new ConfigNode(rootPath, type, fNode);
-				configNode.setValue(new String(this.zkManager.getData(
-						bTTypePath + "/" + fNode)));
+				configNode.setValue(new String(this.getZooKeeper().getData(bTTypePath + "/" + fNode,false,null)));
 				buffer.append(gson.toJson(configNode));
 				buffer.append("\n");
 				writer.write(configNode.toString());
@@ -387,7 +386,7 @@ public class ScheduleStrategyDataManager4ZK{
 		for(String name:names){
 			ManagerFactoryInfo info = new ManagerFactoryInfo();
 			info.setUuid(name);
-			byte[] value = this.zkManager.getData(zkPath+"/"+name);
+			byte[] value = this.getZooKeeper().getData(zkPath+"/"+name,false,null);
 			if(value== null){
 				info.setStart(true);
 			}else{

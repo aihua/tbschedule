@@ -3,13 +3,14 @@ package com.taobao.pamirs.schedule.zk;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException.ConnectionLossException;
-import org.apache.zookeeper.KeeperException.SessionExpiredException;
+import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -19,54 +20,72 @@ import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 
 public class ZKManager{
+	
 	private static transient Log log = LogFactory.getLog(ZKManager.class);
 	private ZooKeeper zk;
 	private List<ACL> acl = new ArrayList<ACL>();
 	private Properties properties;
 	private boolean isCheckParentPath = true;
-	private ScheduleWatcher watcher = new ScheduleWatcher(this);
 	public enum keys {
 		zkConnectString, rootPath, userName, password, zkSessionTimeout, isCheckParentPath
 	}
 
 	public ZKManager(Properties aProperties) throws Exception{
 		this.properties = aProperties;
-		this.createZooKeeper();
+		this.connect();
 	}
 	
-	private void createZooKeeper() throws Exception{
-		String authString = this.properties.getProperty(keys.userName.toString())
-				+ ":"+ this.properties.getProperty(keys.password.toString());
-		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
-				.toString()), Integer.parseInt(this.properties
-				.getProperty(keys.zkSessionTimeout.toString())),
-				watcher);
-		
-		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
-		zk.addAuthInfo("digest", authString.getBytes());
-		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
-				DigestAuthenticationProvider.generateDigest(authString))));
-		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
-	}
-	public void registerChildrenChanged(String path,Watcher watcher) throws Exception{
-		this.watcher.registerChildrenChanged(path, watcher);
-	}
 	/**
 	 * 重新連接zookeeper
 	 * @throws Exception
 	 */
 	public synchronized void  reConnection() throws Exception{
-		if (this.zk == null || this.zk.getState() == States.CLOSED) {
-			log.error("zk连接已关闭，开始重新创建连接...");
-			if (this.zk != null) {
-				this.zk.close();
-				this.zk = null;
-			}
-			this.createZooKeeper();
-			Thread.sleep(2000);
-		} else if (this.zk.getState() == States.CONNECTING) {
-			log.error(zk.getState() + " ,正在连接中...");
-			Thread.sleep(2000);
+		if (this.zk != null) {
+			this.zk.close();
+			this.zk = null;
+			this.connect() ;
+		}
+	}
+	
+	private void connect() throws Exception {
+		final CountDownLatch connectionLatch = new CountDownLatch(1);
+		final CountDownLatch assignLatch = new CountDownLatch(1);
+		String authString = this.properties.getProperty(keys.userName.toString())
+				+ ":"+ this.properties.getProperty(keys.password.toString());
+		zk = new ZooKeeper(this.properties.getProperty(keys.zkConnectString
+				.toString()), Integer.parseInt(this.properties
+				.getProperty(keys.zkSessionTimeout.toString())),
+				new Watcher() {
+					public void process(WatchedEvent event) {
+						sessionEvent(assignLatch, connectionLatch, event);
+					}
+				});
+		this.isCheckParentPath = Boolean.parseBoolean(this.properties.getProperty(keys.isCheckParentPath.toString(),"true"));
+		zk.addAuthInfo("digest", authString.getBytes());
+		acl.add(new ACL(ZooDefs.Perms.ALL, new Id("digest",
+				DigestAuthenticationProvider.generateDigest(authString))));
+		acl.add(new ACL(ZooDefs.Perms.READ, Ids.ANYONE_ID_UNSAFE));
+		assignLatch.countDown();
+		connectionLatch.await();
+	}
+	
+	private void sessionEvent(CountDownLatch assignLatch, CountDownLatch connectionLatch,
+			WatchedEvent event) {
+		try {
+			assignLatch.await();
+			if (event.getState() == KeeperState.SyncConnected) {
+				log.info("收到ZK连接成功事件！");
+				connectionLatch.countDown();
+			} else if (event.getState() == KeeperState.Expired) {
+				log.error("会话超时，等待重新建立ZK连接...");
+				try {
+					reConnection();
+				} catch (Exception e) {
+					log.error(e.getMessage(),e);
+				}
+			} // Disconnected：Zookeeper会自动处理Disconnected状态重连
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 	}
 	
@@ -146,30 +165,8 @@ public class ZKManager{
 	public ZooKeeper getZooKeeper() throws Exception {
 		if(this.checkZookeeperState()==false){
 			reConnection();
-			if(this.checkZookeeperState()==false){
-				throw new Exception("Zookeeper["+ this.getConnectStr()+"] connect error :" + this.zk.getState() );
-			}
 		}
 		return this.zk;
-	}
-	
-	/**
-	 * 封装zookeeper获取数据方法
-	 * 
-	 */
-	public byte[] getData(String path) throws Exception {
-		byte[] data = null;
-		try {
-			data = getZooKeeper().getData(path, false, null);
-		} catch (Exception e) {
-			//需要处理zookeeper session过期和connectionLoss异常
-			if (e instanceof SessionExpiredException || e instanceof ConnectionLossException) {
-				log.error("getData : session expired or connection loss，需要重新连接zookeeper");
-				reConnection();
-				data = getZooKeeper().getData(path, false, null);
-			}
-		}
-		return data;
 	}
 	
 }
