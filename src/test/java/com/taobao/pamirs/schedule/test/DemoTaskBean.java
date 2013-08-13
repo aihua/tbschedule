@@ -57,7 +57,7 @@ public class DemoTaskBean implements IScheduleTaskDealSingle<Long> {
 
 	public boolean execute(Long task, String ownSign) throws Exception {
 		Thread.sleep(50);
-		//log.info("处理任务["+ownSign+"]:" + task);
+		log.info("处理任务["+ownSign+"]:" + task);
 		return true;
 	}
 }
