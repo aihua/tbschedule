@@ -30,7 +30,7 @@ public class InitialDemoConfigData extends UnitilsJUnit4 {
 			Thread.sleep(1000);
 		}
 		scheduleManagerFactory.stopServer(null);
-		
+		Thread.sleep(1000);
 		try {
 			this.scheduleManagerFactory.getScheduleDataManager()
 					.deleteTaskType(baseTaskTypeName);
@@ -53,8 +53,8 @@ public class InitialDemoConfigData extends UnitilsJUnit4 {
 		log.info("创建调度任务成功:" + baseTaskType.toString());
 
 		// 创建任务DemoTask的调度策略
-		String taskName = baseTaskTypeName;
-		String strategyName =taskName +"-Strategy";
+		String taskName = baseTaskTypeName + "$TEST";
+		String strategyName = baseTaskTypeName +"-Strategy";
 		try {
 			this.scheduleManagerFactory.getScheduleStrategyManager()
 					.deleteMachineStrategy(strategyName,true);
