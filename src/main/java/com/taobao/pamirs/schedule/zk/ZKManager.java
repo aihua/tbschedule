@@ -129,7 +129,7 @@ public class ZKManager{
 			}else{
 				String dataVersion = new String(value);
 				if(Version.isCompatible(dataVersion)==false){
-					throw new Exception("Pamirs-Schedule程序版本 "+ Version.getVersion() +" 不兼容Zookeeper中的数据版本 " + dataVersion );
+					throw new Exception("TBSchedule程序版本 "+ Version.getVersion() +" 不兼容Zookeeper中的数据版本 " + dataVersion );
 				}
 				log.info("当前的程序版本:" + Version.getVersion() + " 数据版本: " + dataVersion);
 			}

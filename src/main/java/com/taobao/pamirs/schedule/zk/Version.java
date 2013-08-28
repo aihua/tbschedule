@@ -2,7 +2,7 @@ package com.taobao.pamirs.schedule.zk;
 
 public class Version {
 	
-   public final static String version="taobao-pamirs-schedule-3.0.0";
+   public final static String version="tbschedule-3.2.12";
    
    public static String getVersion(){
 	   return version;
