@@ -10,8 +10,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.IScheduleTaskDealSingle;
 import com.taobao.pamirs.schedule.TaskItemDefine;
@@ -24,7 +24,7 @@ import com.taobao.pamirs.schedule.TaskItemDefine;
  */
 public class DBDemoSingle implements	IScheduleTaskDealSingle<Long> {
 	
-	private static transient Log log = LogFactory.getLog(DBDemoSingle.class);
+	private static transient Logger log = LoggerFactory.getLogger(DBDemoSingle.class);
 
 	protected DataSource dataSource;
 

@@ -6,8 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
 import com.taobao.pamirs.schedule.taskmanager.IScheduleDataManager;
@@ -15,7 +18,7 @@ import com.taobao.pamirs.schedule.zk.ScheduleStrategyDataManager4ZK;
 import com.taobao.pamirs.schedule.zk.ZKManager;
 
 public class ConsoleManager {	
-	protected static transient Log log = LogFactory.getLog(ConsoleManager.class);
+	protected static transient Logger log = LoggerFactory.getLogger(ConsoleManager.class);
 
 	public final static String configFile = System.getProperty("user.dir") + File.separator
 			+ "pamirsScheduleConfig.properties";

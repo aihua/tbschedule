@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.IScheduleTaskDeal;
 import com.taobao.pamirs.schedule.IScheduleTaskDealMulti;
@@ -27,7 +27,7 @@ import com.taobao.pamirs.schedule.TaskItemDefine;
  */
 class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 	
-	private static transient Log logger = LogFactory.getLog(TBScheduleProcessorNotSleep.class);
+	private static transient Logger logger = LoggerFactory.getLogger(TBScheduleProcessorNotSleep.class);
 	
 	List<Thread> threadList =  Collections.synchronizedList(new ArrayList<Thread>());
 	/**

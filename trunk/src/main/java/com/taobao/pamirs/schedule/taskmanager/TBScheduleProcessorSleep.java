@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.IScheduleTaskDeal;
 import com.taobao.pamirs.schedule.IScheduleTaskDealMulti;
@@ -22,7 +22,7 @@ import com.taobao.pamirs.schedule.TaskItemDefine;
  */
 class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	
-	private static transient Log logger = LogFactory.getLog(TBScheduleProcessorSleep.class);
+	private static transient Logger logger = LoggerFactory.getLogger(TBScheduleProcessorSleep.class);
 	final  LockObject   m_lockObject = new LockObject();
 	List<Thread> threadList =  Collections.synchronizedList(new ArrayList<Thread>());
 	/**

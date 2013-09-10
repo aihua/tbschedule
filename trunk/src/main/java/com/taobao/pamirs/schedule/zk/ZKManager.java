@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -18,10 +16,12 @@ import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ZKManager{
 	
-	private static transient Log log = LogFactory.getLog(ZKManager.class);
+	private static transient Logger log = LoggerFactory.getLogger(ZKManager.class);
 	private ZooKeeper zk;
 	private List<ACL> acl = new ArrayList<ACL>();
 	private Properties properties;

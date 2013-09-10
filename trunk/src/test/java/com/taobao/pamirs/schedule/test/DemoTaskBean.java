@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.IScheduleTaskDealSingle;
 import com.taobao.pamirs.schedule.TaskItemDefine;
@@ -18,7 +18,7 @@ import com.taobao.pamirs.schedule.TaskItemDefine;
  * 
  */
 public class DemoTaskBean implements IScheduleTaskDealSingle<Long> {
-	protected static transient Log log = LogFactory.getLog(DemoTaskBean.class);
+	protected static transient Logger log = LoggerFactory.getLogger(DemoTaskBean.class);
 
 	public Comparator<Long> getComparator() {
 		return new Comparator<Long>() {
