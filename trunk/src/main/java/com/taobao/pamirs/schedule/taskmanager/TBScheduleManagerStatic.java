@@ -16,6 +16,8 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
     protected int taskItemCount =0;
 
     protected long lastFetchVersion = -1;
+    
+    private Object NeedReloadTaskItemLock;
 
 	public TBScheduleManagerStatic(TBScheduleManagerFactory aFactory,
 			String baseTaskType, String ownSign,IScheduleDataManager aScheduleCenter) throws Exception {
@@ -111,7 +113,9 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
         boolean tmpBoolean = this.isNeedReLoadTaskItemList();
         if(tmpBoolean != this.isNeedReloadTaskItem){
         	//只要不相同，就设置需要重新装载，因为在心跳异常的时候，做了清理队列的事情，恢复后需要重新装载。
-        	this.isNeedReloadTaskItem = true;
+        	synchronized (NeedReloadTaskItemLock) {
+        		this.isNeedReloadTaskItem = true;
+        	}
         	rewriteScheduleInfo();
         }
         
@@ -188,7 +192,10 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 					}
 			}
 			//真正开始处理数据
-			this.getCurrentScheduleTaskItemListNow();
+			synchronized (NeedReloadTaskItemLock) {
+				this.getCurrentScheduleTaskItemListNow();
+				this.isNeedReloadTaskItem = false;
+			}
 		}
 		this.lastReloadTaskItemListTime = this.scheduleCenter.getSystemTime();		
 		return this.currentTaskItemList;		
