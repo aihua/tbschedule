@@ -17,7 +17,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 
     protected long lastFetchVersion = -1;
     
-    private Object NeedReloadTaskItemLock;
+    private final Object NeedReloadTaskItemLock = new Object();
 
 	public TBScheduleManagerStatic(TBScheduleManagerFactory aFactory,
 			String baseTaskType, String ownSign,IScheduleDataManager aScheduleCenter) throws Exception {
