@@ -6,7 +6,7 @@
 	<groupId>com.taobao.pamirs.schedule</groupId>
 	<artifactId>tbschedule</artifactId>
 	<packaging>jar</packaging>
-	<version>3.2.12</version>
+	<version>3.2.13-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>commons-lang</groupId>
