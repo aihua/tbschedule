@@ -2,14 +2,14 @@ package com.taobao.pamirs.schedule.taskmanager;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.TaskItemDefine;
 import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
 
 public class TBScheduleManagerStatic extends TBScheduleManager {
-	private static transient Log log = LogFactory.getLog(TBScheduleManagerStatic.class);
+	private static transient Logger log = LoggerFactory.getLogger(TBScheduleManagerStatic.class);
     /**
 	 * 总的任务数量
 	 */

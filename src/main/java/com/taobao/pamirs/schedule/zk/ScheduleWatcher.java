@@ -3,14 +3,14 @@ package com.taobao.pamirs.schedule.zk;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScheduleWatcher implements Watcher {
-	private static transient Log log = LogFactory.getLog(ScheduleWatcher.class);
+	private static transient Logger log = LoggerFactory.getLogger(ScheduleWatcher.class);
 	private Map<String,Watcher> route = new ConcurrentHashMap<String,Watcher>();
 	private ZKManager manager;
 	public ScheduleWatcher(ZKManager aManager){

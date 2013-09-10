@@ -13,12 +13,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -38,7 +38,7 @@ import com.taobao.pamirs.schedule.taskmanager.ScheduleTaskType;
 import com.taobao.pamirs.schedule.taskmanager.ScheduleTaskTypeRunningInfo;
 
 public class ScheduleDataManager4ZK implements IScheduleDataManager {
-	private static transient Log log = LogFactory.getLog(ScheduleDataManager4ZK.class);
+	private static transient Logger log = LoggerFactory.getLogger(ScheduleDataManager4ZK.class);
 	private Gson gson ;
 	private ZKManager zkManager;
 	private String PATH_BaseTaskType;
@@ -62,7 +62,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
         zkBaseTime = tempStat.getCtime();
         ZKTools.deleteTree(getZooKeeper(), tempPath);
         if(Math.abs(this.zkBaseTime - this.loclaBaseTime) > 5000){
-        	log.fatal("请注意，Zookeeper服务器时间与本地时间相差 ： " + Math.abs(this.zkBaseTime - this.loclaBaseTime) +" ms");
+        	log.error("请注意，Zookeeper服务器时间与本地时间相差 ： " + Math.abs(this.zkBaseTime - this.loclaBaseTime) +" ms");
         }	
 	}	
 	
@@ -540,7 +540,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			server.setCenterServerTime(new Timestamp(this.getSystemTime()));
 			result.add(server);
 			}catch(Exception e){
-				log.debug(e);
+				log.debug(e.getMessage(), e);
 			}
 		}
 		return result;
@@ -653,7 +653,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			 for(ScheduleTaskItem taskItem: this.loadAllTaskItem(taskType)){
 				buffer.append("\n").append(taskItem.toString());
 			 }
-			 log.debug(buffer);
+			 log.debug(buffer.toString());
 		 }
 	}
 	public void assignTaskItem22(String taskType, String currentUuid,
@@ -700,7 +700,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			 for(ScheduleTaskItem taskItem: this.loadAllTaskItem(taskType)){
 				buffer.append("\n").append(taskItem.toString());
 			 }
-			 log.debug(buffer);
+			 log.debug(buffer.toString());
 		 }
 	}
 	public void registerScheduleServer(ScheduleServer server) throws Exception {

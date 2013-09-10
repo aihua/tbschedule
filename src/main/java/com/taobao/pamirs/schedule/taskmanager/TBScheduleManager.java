@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.taobao.pamirs.schedule.CronExpression;
 import com.taobao.pamirs.schedule.IScheduleTaskDeal;
@@ -41,7 +41,7 @@ import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 abstract class TBScheduleManager implements IStrategyTask {
-	private static transient Log log = LogFactory.getLog(TBScheduleManager.class);
+	private static transient Logger log = LoggerFactory.getLogger(TBScheduleManager.class);
 	/**
 	 * 用户标识不同线程的序号
 	 */
@@ -397,8 +397,8 @@ abstract class TBScheduleManager implements IStrategyTask {
 }
 
 class HeartBeatTimerTask extends java.util.TimerTask {
-	private static transient Log log = LogFactory
-			.getLog(HeartBeatTimerTask.class);
+	private static transient Logger log = LoggerFactory
+			.getLogger(HeartBeatTimerTask.class);
 	TBScheduleManager manager;
 
 	public HeartBeatTimerTask(TBScheduleManager aManager) {
@@ -416,8 +416,8 @@ class HeartBeatTimerTask extends java.util.TimerTask {
 }
 
 class PauseOrResumeScheduleTask extends java.util.TimerTask {
-	private static transient Log log = LogFactory
-			.getLog(HeartBeatTimerTask.class);
+	private static transient Logger log = LoggerFactory
+			.getLogger(HeartBeatTimerTask.class);
 	public static int TYPE_PAUSE  = 1;
 	public static int TYPE_RESUME = 2;	
 	TBScheduleManager manager;

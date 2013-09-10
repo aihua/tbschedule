@@ -1,8 +1,8 @@
 package com.taobao.pamirs.schedule.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unitils.UnitilsJUnit4;
 import org.unitils.spring.annotation.SpringApplicationContext;
 import org.unitils.spring.annotation.SpringBeanByName;
@@ -13,8 +13,8 @@ import com.taobao.pamirs.schedule.taskmanager.ScheduleTaskType;
 
 @SpringApplicationContext({ "schedule.xml" })
 public class InitialDemoConfigData extends UnitilsJUnit4 {
-	protected static transient Log log = LogFactory
-			.getLog(InitialDemoConfigData.class);
+	protected static transient Logger log = LoggerFactory
+			.getLogger(InitialDemoConfigData.class);
 	@SpringBeanByName
 	TBScheduleManagerFactory scheduleManagerFactory;
 

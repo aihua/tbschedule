@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.ZooKeeper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -33,7 +33,7 @@ import com.taobao.pamirs.schedule.zk.ZKManager;
  */
 public class TBScheduleManagerFactory implements ApplicationContextAware {
 
-	protected static transient Log logger = LogFactory.getLog(TBScheduleManagerFactory.class);
+	protected static transient Logger logger = LoggerFactory.getLogger(TBScheduleManagerFactory.class);
 	
 	private Map<String,String> zkConfig;
 	
@@ -414,7 +414,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 }
 
 class ManagerFactoryTimerTask extends java.util.TimerTask {
-	private static transient Log log = LogFactory.getLog(ManagerFactoryTimerTask.class);
+	private static transient Logger log = LoggerFactory.getLogger(ManagerFactoryTimerTask.class);
 	TBScheduleManagerFactory factory;
 	int count =0;
 
@@ -444,7 +444,7 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 }
 
 class InitialThread extends Thread{
-	private static transient Log log = LogFactory.getLog(InitialThread.class);
+	private static transient Logger log = LoggerFactory.getLogger(InitialThread.class);
 	TBScheduleManagerFactory facotry;
 	boolean isStop = false;
 	public InitialThread(TBScheduleManagerFactory aFactory){
