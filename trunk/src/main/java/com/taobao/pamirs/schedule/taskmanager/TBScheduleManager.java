@@ -132,7 +132,7 @@ abstract class TBScheduleManager implements IStrategyTask {
     	this.mBeanName = "pamirs:name=" + "schedule.ServerMananger." +this.currenScheduleServer.getUuid();
     	this.heartBeatTimer = new Timer(this.currenScheduleServer.getTaskType() +"-" + this.currentSerialNumber +"-HeartBeat");
     	this.heartBeatTimer.schedule(new HeartBeatTimerTask(this),
-                new java.util.Date(this.scheduleCenter.getSystemTime() + 500),
+                new java.util.Date(System.currentTimeMillis() + 500),
                 this.taskTypeInfo.getHeartBeatRate());
     	initial();
 	}  
@@ -434,7 +434,7 @@ class PauseOrResumeScheduleTask extends java.util.TimerTask {
 		try {
 			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 			this.cancel();//取消调度任务
-			Date current = new Date( this.manager.scheduleCenter.getSystemTime());
+			Date current = new Date(System.currentTimeMillis());
 			CronExpression cexp = new CronExpression(this.cronTabExpress);
 			Date nextTime = cexp.getNextValidTimeAfter(current);
 			if(this.type == TYPE_PAUSE){
