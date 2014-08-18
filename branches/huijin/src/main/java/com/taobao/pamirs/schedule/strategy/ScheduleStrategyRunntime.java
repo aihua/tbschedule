@@ -87,5 +87,14 @@ public class ScheduleStrategyRunntime {
 	public void setCurrentNum(int currentNum) {
 		this.currentNum = currentNum;
 	}
+	@Override
+	public String toString() {
+		return "ScheduleStrategyRunntime [strategyName=" + strategyName
+				+ ", uuid=" + uuid + ", ip=" + ip + ", kind=" + kind
+				+ ", taskName=" + taskName + ", taskParameter=" + taskParameter
+				+ ", requestNum=" + requestNum + ", currentNum=" + currentNum
+				+ ", message=" + message + "]";
+	}
+	
 
 }

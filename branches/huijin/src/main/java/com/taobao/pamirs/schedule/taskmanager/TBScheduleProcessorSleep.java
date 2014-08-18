@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	
 	private static transient Logger logger = LoggerFactory.getLogger(TBScheduleProcessorSleep.class);
 	final  LockObject   m_lockObject = new LockObject();
-	List<Thread> threadList =  Collections.synchronizedList(new ArrayList<Thread>());
+	List<Thread> threadList =  new CopyOnWriteArrayList<Thread>();
 	/**
 	 * 任务管理器
 	 */
@@ -46,7 +47,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	final Object lockVersionObject = new Object();
 	final Object lockRunningList = new Object();
 
-	protected List<T> taskList = Collections.synchronizedList(new ArrayList<T>());
+	protected List<T> taskList = new CopyOnWriteArrayList<T>();
 
 	/**
 	 * 是否可以批处理
@@ -162,10 +163,16 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 			List<TaskItemDefine> taskItems = this.scheduleManager.getCurrentScheduleTaskItemList();
 			// 根据队列信息查询需要调度的数据，然后增加到任务列表中
 			if (taskItems.size() > 0) {
+				List<TaskItemDefine> tmpTaskList= new ArrayList<TaskItemDefine>();
+				synchronized(taskItems){
+					for (TaskItemDefine taskItemDefine : taskItems) {
+						tmpTaskList.add(taskItemDefine);
+					}
+				}
 				List<T> tmpList = this.taskDealBean.selectTasks(
 						taskTypeInfo.getTaskParameter(),
 						scheduleManager.getScheduleServer().getOwnSign(),
-						this.scheduleManager.getTaskItemCount(), taskItems,
+						this.scheduleManager.getTaskItemCount(), tmpTaskList,
 						taskTypeInfo.getFetchDataNumber());
 				scheduleManager.getScheduleServer().setLastFetchDataTime(new Timestamp(scheduleManager.scheduleCenter.getSystemTime()));
 				if(tmpList != null){

@@ -46,6 +46,12 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	 */
 	public boolean start = true;
 	private int timerInterval = 2000;
+	/**
+	 * ManagerFactoryTimerTask上次执行的时间戳。<br/>
+	 * zk环境不稳定，可能导致所有task自循环丢失，调度停止。<br/>
+	 * 外层应用，通过jmx暴露心跳时间，监控这个tbschedule最重要的大循环。<br/>
+	 */
+	public volatile long timerTaskHeartBeatTS = System.currentTimeMillis();
 	
 	/**
 	 * 调度配置中心客服端
@@ -439,6 +445,8 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 			}
 		} catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
+		}finally {
+		    factory.timerTaskHeartBeatTS = System.currentTimeMillis();
 		}
 	}
 }

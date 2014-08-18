@@ -68,7 +68,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
         			      count = count + 1;
         			     // log.error("尝试获取调度队列，第" + count + "次 ") ;
     			   }
-    			   String tmpStr ="";
+    			   String tmpStr ="TaskItemDefine:";
     			   for(int i=0;i< currentTaskItemList.size();i++){
     				   if(i>0){
     					   tmpStr = tmpStr +",";    					   

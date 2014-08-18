@@ -27,5 +27,11 @@ public class TaskItemDefine {
 	public String getTaskItemId() {
 		return taskItemId;
 	}
+	@Override
+	public String toString() {
+		return "(t=" + taskItemId + ",p="
+				+ parameter + ")";
+	}
+	
 
 }
