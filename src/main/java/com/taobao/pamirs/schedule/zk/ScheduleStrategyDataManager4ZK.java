@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
@@ -173,8 +174,17 @@ public class ScheduleStrategyDataManager4ZK{
 		if(this.getZooKeeper().exists(zkPath, false) !=null){
 			byte[] value = this.getZooKeeper().getData(zkPath,false,null);
 			if (value != null) {
-				String valueString = new String(this.getZooKeeper().getData(zkPath,false,null));
+				String valueString = new String(value);
 				result = (ScheduleStrategyRunntime) this.gson.fromJson(valueString, ScheduleStrategyRunntime.class);
+				if(null==result){
+					throw new Exception("gson 反序列化异常,对象为null");
+				}
+				if(null==result.getStrategyName()){
+					throw new Exception("gson 反序列化异常,策略名字为null");
+				}
+				if(null==result.getUuid()){
+					throw new Exception("gson 反序列化异常,uuid为null");
+				}
 			}else{
 				result = new ScheduleStrategyRunntime();
 				result.setStrategyName(strategyName);

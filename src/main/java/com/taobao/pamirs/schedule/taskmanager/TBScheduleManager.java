@@ -1,9 +1,11 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -74,8 +76,9 @@ abstract class TBScheduleManager implements IStrategyTask {
     String pauseMessage="";
     /**
      *  当前处理任务队列清单
+     *  ArrayList实现不是同步的。因多线程操作修改该列表，会造成ConcurrentModificationException
      */
-    protected List<TaskItemDefine> currentTaskItemList = new ArrayList<TaskItemDefine>();
+    protected List<TaskItemDefine> currentTaskItemList = new CopyOnWriteArrayList<TaskItemDefine>();
     /**
      * 最近一起重新装载调度任务的时间。
      * 当前实际  - 上此装载时间  > intervalReloadTaskItemList，则向配置中心请求最新的任务分配情况

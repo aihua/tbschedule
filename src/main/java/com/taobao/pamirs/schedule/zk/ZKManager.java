@@ -26,6 +26,7 @@ public class ZKManager{
 	private List<ACL> acl = new ArrayList<ACL>();
 	private Properties properties;
 	private boolean isCheckParentPath = true;
+	
 	public enum keys {
 		zkConnectString, rootPath, userName, password, zkSessionTimeout, isCheckParentPath
 	}
@@ -88,6 +89,9 @@ public class ZKManager{
 	
 	public void close() throws InterruptedException {
 		log.info("πÿ±’zookeeper¡¨Ω”");
+		if(zk == null) {
+ 		    return;
+		}
 		this.zk.close();
 	}
 	public static Properties createProperties(){
