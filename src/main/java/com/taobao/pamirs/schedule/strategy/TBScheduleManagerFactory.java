@@ -324,6 +324,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 						zk.close();
 					}
 				} catch (Exception e) {
+					logger.warn("zk getZooKeeper“Ï≥££°",e);
 				}
 			}
 			this.uuid = null;
