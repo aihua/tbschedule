@@ -77,7 +77,7 @@ public class ZKManager{
 		if (event.getState() == KeeperState.SyncConnected) {
 			log.info("收到ZK连接成功事件！");
 			connectionLatch.countDown();
-		} else if (event.getState() == KeeperState.Expired) {
+		} else if (event.getState() == KeeperState.Expired ) {
 			log.error("会话超时，等待重新建立ZK连接...");
 			try {
 				reConnection();
@@ -85,6 +85,25 @@ public class ZKManager{
 				log.error(e.getMessage(),e);
 			}
 		} // Disconnected：Zookeeper会自动处理Disconnected状态重连
+		else if (event.getState() == KeeperState.Disconnected ) {
+			log.info("tb_hj_schedule Disconnected，等待重新建立ZK连接...");
+			try {
+				reConnection();
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+			}
+		}
+		else if (event.getState() == KeeperState.NoSyncConnected ) {
+			log.info("tb_hj_schedule NoSyncConnected，等待重新建立ZK连接...");
+			try {
+				reConnection();
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+			}
+		}
+		else{
+			log.info("tb_hj_schedule 会话有其他状态的值，event.getState() ="+event.getState() +", event  value="+event.toString());
+		}
 	}
 	
 	public void close() throws InterruptedException {
