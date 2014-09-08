@@ -405,6 +405,10 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 					item.setParameter(new String(parameterValue));
 				}
 				result.add(item);
+			}else if(value != null && uuid.equals(new String(value))==false){
+				log.info(" current uid="+uuid+" , zk cur_server uid="+new String(value));
+			}else  {
+				log.info(" current uid="+uuid);
 			}
 		 }
 		 return result;
