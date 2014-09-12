@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,33 +161,39 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		return result;
 	}
 
+	/**在refresh时，其实还是因为zk等原因，会出现多种异常，
+	 * @throws Exception
+	 */
 	public void refresh() throws Exception {
 		this.lock.lock();
-		try {
+		try{
 			// 判断状态是否终止
 			ManagerFactoryInfo stsInfo = null;
-			boolean isException = false;
-			try {
-				stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
-			} catch (Exception e) {
-				isException = true;
-				logger.error(e.getMessage(), e);
-			}
-			if (isException == true) {
-				try {
-					stopServer(null); // 停止所有的调度任务
-					this.getScheduleStrategyManager().unRregisterManagerFactory(this);
-				} finally {
-					reRegisterManagerFactory();
-				}
-			} else if (stsInfo.isStart() == false) {
+			stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
+			if (stsInfo.isStart() == false) {
 				stopServer(null); // 停止所有的调度任务
 				this.getScheduleStrategyManager().unRregisterManagerFactory(
 						this);
 			} else {
 				reRegisterManagerFactory();
 			}
-		} finally {
+	    }catch (KeeperException e) {
+	    	logger.error("tbschedule 因 zookeeper发生选举时，出现异常，将停止调度",e);
+	    	//zookeeper发生选举时，可能会产生KeeperException 的ConnectionLoss，
+	    	//造成schedule线程也挂掉
+		   stopServer(null);
+		   //都失去连接了，注销服务肯定是异常，
+		   this.getScheduleStrategyManager().unRregisterManagerFactory(
+					this);
+		   throw e;
+		}catch (Exception e) {
+	    	logger.error("tbschedule出现不可预料的异常，将注销服务，并停止调度",e);
+			stopServer(null);
+			this.getScheduleStrategyManager().unRregisterManagerFactory(
+					this);
+			throw e;
+		}
+		finally {
 			this.lock.unlock();
 		}
 	}
@@ -354,9 +361,13 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			}
 			this.uuid = null;
 			this.init();
-		} catch (Throwable e) {
-			logger.error("重启服务失败：" + e.getMessage(), e);
-		}
+		}catch (KeeperException e) {
+			logger.error("重启服务失败：连接zookpeeper出现异常" , e);
+			throw e;
+		} catch (Exception e) {
+			logger.error("重启服务失败：不知道的异常" , e);
+			throw e;
+		} 
     }
     public boolean isZookeeperInitialSucess() throws Exception{
     	return this.zkManager.checkZookeeperState();
@@ -423,7 +434,8 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 class ManagerFactoryTimerTask extends java.util.TimerTask {
 	private static transient Logger log = LoggerFactory.getLogger(ManagerFactoryTimerTask.class);
 	TBScheduleManagerFactory factory;
-	int count =0;
+	int keepExceptionCount =0;
+	int maxTime= 1000*60*60;
 
 	public ManagerFactoryTimerTask(TBScheduleManagerFactory aFactory) {
 		this.factory = aFactory;
@@ -432,22 +444,40 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 	public void run() {
 		try {
 			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-			if(this.factory.zkManager.checkZookeeperState() == false){
-				if(count > 5){
+			if(this.factory.zkManager.checkZookeeperState() == false || keepExceptionCount>3){
 				   log.error("Zookeeper连接失败，关闭所有的任务后，重新连接Zookeeper服务器......");
 				   this.factory.reStart();
-				  
-				}else{
-				   count = count + 1;
-				}
+				   //成功后，初始化为0
+				   keepExceptionCount =0;
 			}else{
-				count = 0;
-			    this.factory.refresh();
+					// refresh时，在指定次数的异常中，我们希望通过
+					//重试
+					this.factory.refresh();
+				
 			}
-		} catch (Throwable ex) {
-			log.error(ex.getMessage(), ex);
+		}  catch (KeeperException e1) {
+			keepExceptionCount =keepExceptionCount +1;
+			//有可能因zk集群做选举操作，导致失去链接,为了保证主线程活着，进入休眠
+			log.error("tbschedule 发现zookeepr 失去链接 ,开始休眠",e1);
+		} catch (Exception e) {
+			keepExceptionCount =keepExceptionCount +1;
+			log.error("出现未知的Exception异常", e);
+		}catch (Throwable e) {
+			keepExceptionCount =keepExceptionCount +1;
+			log.error("出现未知道的Throwable异常", e);
 		}finally {
-		    factory.timerTaskHeartBeatTS = System.currentTimeMillis();
+			//主线程按2分钟的N次幂进行重试，
+			factory.timerTaskHeartBeatTS = System.currentTimeMillis();
+			int sleepTime=1000*60*2*keepExceptionCount;
+			if(sleepTime>maxTime){
+				sleepTime=maxTime;
+			}
+			try {
+				log.warn("tbschedule 主线程因zk等原因，将休眠 一段时间后重试,共休眠"+2*keepExceptionCount+"分钟");
+				Thread.sleep(sleepTime);
+			} catch (InterruptedException e) {
+				log.error("tbschedule sleep出现异常", e);
+			}
 		}
 	}
 }
