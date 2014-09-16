@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
@@ -51,7 +52,7 @@ public class ZKManager{
 	private void connect() throws Exception {
 		CountDownLatch connectionLatch = new CountDownLatch(1);
 		createZookeeper(connectionLatch);
-		connectionLatch.await();
+		connectionLatch.await(10,TimeUnit.SECONDS);
 	}
 	
 	private void createZookeeper(final CountDownLatch connectionLatch) throws Exception {
