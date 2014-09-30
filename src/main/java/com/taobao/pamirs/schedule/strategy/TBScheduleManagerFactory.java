@@ -146,16 +146,20 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	public IStrategyTask createStrategyTask(ScheduleStrategy strategy)
 			throws Exception {
 		IStrategyTask result = null;
-		if(ScheduleStrategy.Kind.Schedule == strategy.getKind()){
-			String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(strategy.getTaskName());
-			String ownSign =ScheduleUtil.splitOwnsignFromTaskType(strategy.getTaskName());
-			result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,scheduleDataManager);
-		}else if(ScheduleStrategy.Kind.Java == strategy.getKind()){
-		    result=(IStrategyTask)Class.forName(strategy.getTaskName()).newInstance();
-		    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
-		}else if(ScheduleStrategy.Kind.Bean == strategy.getKind()){
-		    result=(IStrategyTask)this.getBean(strategy.getTaskName());
-		    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+		try{
+			if(ScheduleStrategy.Kind.Schedule == strategy.getKind()){
+				String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(strategy.getTaskName());
+				String ownSign =ScheduleUtil.splitOwnsignFromTaskType(strategy.getTaskName());
+				result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,scheduleDataManager);
+			}else if(ScheduleStrategy.Kind.Java == strategy.getKind()){
+			    result=(IStrategyTask)Class.forName(strategy.getTaskName()).newInstance();
+			    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+			}else if(ScheduleStrategy.Kind.Bean == strategy.getKind()){
+			    result=(IStrategyTask)this.getBean(strategy.getTaskName());
+			    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+			}
+		}catch(Exception e ){
+			logger.error("strategy 获取对应的java or bean 出错,schedule并没有加载该任务,请确认" +strategy.getStrategyName(),e);
 		}
 		return result;
 	}
@@ -256,6 +260,9 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		   ScheduleStrategy strategy = this.scheduleStrategyManager.loadStrategy(run.getStrategyName());
 		   while(list.size() < run.getRequestNum()){
 			   IStrategyTask result = this.createStrategyTask(strategy);
+			   if(null==result){
+				   logger.error("strategy 对应的配置有问题。strategy name="+strategy.getStrategyName());
+			   }
 			   list.add(result);
 		    }
 		}
@@ -444,6 +451,7 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 				count = 0;
 			    this.factory.refresh();
 			}
+
 		}  catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
 		} finally {
