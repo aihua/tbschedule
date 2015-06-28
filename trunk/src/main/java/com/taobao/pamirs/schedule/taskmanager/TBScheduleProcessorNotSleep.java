@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,7 +30,7 @@ class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 	
 	private static transient Logger logger = LoggerFactory.getLogger(TBScheduleProcessorNotSleep.class);
 	
-	List<Thread> threadList =  Collections.synchronizedList(new ArrayList<Thread>());
+	List<Thread> threadList = new CopyOnWriteArrayList<Thread>();
 	/**
 	 * 任务管理器
 	 */
@@ -52,15 +53,15 @@ class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 
 	StatisticsInfo statisticsInfo;
 
-	protected List<T> taskList =Collections.synchronizedList(new ArrayList<T>());
+	protected List<T> taskList =new CopyOnWriteArrayList<T>();
 	/**
 	 * 正在处理中的任务队列
 	 */
-	protected List<Object> runningTaskList = Collections.synchronizedList(new ArrayList<Object>()); 
+	protected List<Object> runningTaskList = new CopyOnWriteArrayList<Object>(); 
 	/**
 	 * 在重新取数据，可能会重复的数据。在重新去数据前，从runningTaskList拷贝得来
 	 */
-	protected List<T> maybeRepeatTaskList = Collections.synchronizedList(new ArrayList<T>());
+	protected List<T> maybeRepeatTaskList = new CopyOnWriteArrayList<T>();
 
 	Lock lockFetchID = new ReentrantLock();
 	Lock lockFetchMutilID = new ReentrantLock();	
@@ -244,10 +245,16 @@ class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 						.getCurrentScheduleTaskItemList();
 				// 根据队列信息查询需要调度的数据，然后增加到任务列表中
 				if (taskItems.size() > 0) {
+					List<TaskItemDefine> tmpTaskList= new ArrayList<TaskItemDefine>();
+					synchronized(taskItems){
+						for (TaskItemDefine taskItemDefine : taskItems) {
+							tmpTaskList.add(taskItemDefine);
+						}
+					}
 					List<T> tmpList = this.taskDealBean.selectTasks(
 							taskTypeInfo.getTaskParameter(),
 							scheduleManager.getScheduleServer()
-									.getOwnSign(), this.scheduleManager.getTaskItemCount(), taskItems,
+									.getOwnSign(), this.scheduleManager.getTaskItemCount(), tmpTaskList,
 							taskTypeInfo.getFetchDataNumber());
 					scheduleManager.getScheduleServer().setLastFetchDataTime(new Timestamp(scheduleManager.scheduleCenter.getSystemTime()));
 					if (tmpList != null) {

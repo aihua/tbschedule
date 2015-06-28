@@ -46,6 +46,12 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	 */
 	public boolean start = true;
 	private int timerInterval = 2000;
+	/**
+	 * ManagerFactoryTimerTask上次执行的时间戳。<br/>
+	 * zk环境不稳定，可能导致所有task自循环丢失，调度停止。<br/>
+	 * 外层应用，通过jmx暴露心跳时间，监控这个tbschedule最重要的大循环。<br/>
+	 */
+	public volatile long timerTaskHeartBeatTS = System.currentTimeMillis();
 	
 	/**
 	 * 调度配置中心客服端
@@ -140,16 +146,20 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	public IStrategyTask createStrategyTask(ScheduleStrategy strategy)
 			throws Exception {
 		IStrategyTask result = null;
-		if(ScheduleStrategy.Kind.Schedule == strategy.getKind()){
-			String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(strategy.getTaskName());
-			String ownSign =ScheduleUtil.splitOwnsignFromTaskType(strategy.getTaskName());
-			result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,scheduleDataManager);
-		}else if(ScheduleStrategy.Kind.Java == strategy.getKind()){
-		    result=(IStrategyTask)Class.forName(strategy.getTaskName()).newInstance();
-		    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
-		}else if(ScheduleStrategy.Kind.Bean == strategy.getKind()){
-		    result=(IStrategyTask)this.getBean(strategy.getTaskName());
-		    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+		try{
+			if(ScheduleStrategy.Kind.Schedule == strategy.getKind()){
+				String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(strategy.getTaskName());
+				String ownSign =ScheduleUtil.splitOwnsignFromTaskType(strategy.getTaskName());
+				result = new TBScheduleManagerStatic(this,baseTaskType,ownSign,scheduleDataManager);
+			}else if(ScheduleStrategy.Kind.Java == strategy.getKind()){
+			    result=(IStrategyTask)Class.forName(strategy.getTaskName()).newInstance();
+			    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+			}else if(ScheduleStrategy.Kind.Bean == strategy.getKind()){
+			    result=(IStrategyTask)this.getBean(strategy.getTaskName());
+			    result.initialTaskParameter(strategy.getStrategyName(),strategy.getTaskParameter());
+			}
+		}catch(Exception e ){
+			logger.error("strategy 获取对应的java or bean 出错,schedule并没有加载该任务,请确认" +strategy.getStrategyName(),e);
 		}
 		return result;
 	}
@@ -250,6 +260,9 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		   ScheduleStrategy strategy = this.scheduleStrategyManager.loadStrategy(run.getStrategyName());
 		   while(list.size() < run.getRequestNum()){
 			   IStrategyTask result = this.createStrategyTask(strategy);
+			   if(null==result){
+				   logger.error("strategy 对应的配置有问题。strategy name="+strategy.getStrategyName());
+			   }
 			   list.add(result);
 		    }
 		}
@@ -318,6 +331,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 						zk.close();
 					}
 				} catch (Exception e) {
+					logger.warn("zk getZooKeeper异常！",e);
 				}
 			}
 			this.uuid = null;
@@ -437,8 +451,11 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 				count = 0;
 			    this.factory.refresh();
 			}
-		} catch (Throwable ex) {
+
+		}  catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
+		} finally {
+		    factory.timerTaskHeartBeatTS = System.currentTimeMillis();
 		}
 	}
 }

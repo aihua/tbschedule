@@ -68,7 +68,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
         			      count = count + 1;
         			     // log.error("尝试获取调度队列，第" + count + "次 ") ;
     			   }
-    			   String tmpStr ="";
+    			   String tmpStr ="TaskItemDefine:";
     			   for(int i=0;i< currentTaskItemList.size();i++){
     				   if(i>0){
     					   tmpStr = tmpStr +",";    					   
@@ -219,9 +219,18 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 			//如果超过10个心跳周期还没有获取到调度队列，则报警
 			if(this.currentTaskItemList.size() ==0 && 
 					scheduleCenter.getSystemTime() - this.lastReloadTaskItemListTime
-					> this.taskTypeInfo.getHeartBeatRate() * 10){			
-				String message ="调度服务器" + this.currenScheduleServer.getUuid() +"[TASK_TYPE=" + this.currenScheduleServer.getTaskType() + "]自启动以来，超过10个心跳周期，还 没有获取到分配的任务队列";
-				log.warn(message);
+					> this.taskTypeInfo.getHeartBeatRate() * 10){
+				StringBuffer buf =new StringBuffer();
+				buf.append("调度服务器");
+				buf.append( this.currenScheduleServer.getUuid());
+				buf.append("[TASK_TYPE=");
+				buf.append( this.currenScheduleServer.getTaskType() );
+				buf.append( "]自启动以来，超过10个心跳周期，还 没有获取到分配的任务队列;");
+				buf.append("  currentTaskItemList.size() ="+currentTaskItemList.size());
+				buf.append(" ,scheduleCenter.getSystemTime()="+scheduleCenter.getSystemTime());
+				buf.append(" ,lastReloadTaskItemListTime="+lastReloadTaskItemListTime);
+				buf.append(" ,taskTypeInfo.getHeartBeatRate()="+taskTypeInfo.getHeartBeatRate()*10);
+				log.warn(buf.toString());
 			}
 			
 			if(this.currentTaskItemList.size() >0){
