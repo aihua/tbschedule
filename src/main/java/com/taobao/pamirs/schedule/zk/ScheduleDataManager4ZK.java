@@ -247,7 +247,25 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		    return result;	
 		}
 		List<String> taskItems = this.getZooKeeper().getChildren(zkPath, false);
-		Collections.sort(taskItems);
+//		 Collections.sort(taskItems);
+//		20150323 有些任务分片，业务方其实是用数字的字符串排序的。优先以数字进行排序，否则以字符串排序
+		Collections.sort(taskItems,new Comparator<String>(){
+			public int compare(String u1, String u2) {
+				if(StringUtils.isNumeric(u1) && StringUtils.isNumeric(u2)){
+					int iU1= Integer.parseInt(u1);
+					int iU2= Integer.parseInt(u2);
+					if(iU1==iU2){
+						return 0 ;
+					}else if(iU1>iU2){
+						return 1 ;
+					}else{
+						return -1;
+					}
+				}else{
+					return u1.compareTo(u2);
+				}
+			}
+		});
 		for(String taskItem:taskItems){
 			ScheduleTaskItem info = new ScheduleTaskItem();
 			info.setTaskType(taskType);
@@ -392,8 +410,28 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType + "/" + taskType + "/" + this.PATH_TaskItem;
 		 
 		 List<String> taskItems = this.getZooKeeper().getChildren(zkPath, false);
-		 Collections.sort(taskItems);
+//		 Collections.sort(taskItems);
+//		 有些任务分片，业务方其实是用数字的字符串排序的。优先以字符串方式进行排序
+		Collections.sort(taskItems,new Comparator<String>(){
+			public int compare(String u1, String u2) {
+				if(StringUtils.isNumeric(u1) && StringUtils.isNumeric(u2)){
+					int iU1= Integer.parseInt(u1);
+					int iU2= Integer.parseInt(u2);
+					if(iU1==iU2){
+						return 0 ;
+					}else if(iU1>iU2){
+						return 1 ;
+					}else{
+						return -1;
+					}
+				}else{
+					return u1.compareTo(u2);
+				}
+			}
+		});
 		 
+		log.info(taskType+ " current uid="+uuid+" , zk  reloadDealTaskItem");
+		
 		 List<TaskItemDefine> result = new ArrayList<TaskItemDefine>();
 		 for(String name:taskItems){
 			byte[] value = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
@@ -405,6 +443,10 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 					item.setParameter(new String(parameterValue));
 				}
 				result.add(item);
+			}else if(value != null && uuid.equals(new String(value))==false){
+				log.debug(" current uid="+uuid+" , zk cur_server uid="+new String(value));
+			}else  {
+				log.debug(" current uid="+uuid);
 			}
 		 }
 		 return result;
@@ -615,7 +657,25 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(taskType);
 		 String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType + "/" + taskType + "/" + this.PATH_TaskItem;
 		 List<String> children = this.getZooKeeper().getChildren(zkPath, false);
-		 Collections.sort(children);
+//		 Collections.sort(children);
+//	     20150323 有些任务分片，业务方其实是用数字的字符串排序的。优先以数字进行排序，否则以字符串排序
+		 Collections.sort(children,new Comparator<String>(){
+			 public int compare(String u1, String u2) {
+					if(StringUtils.isNumeric(u1) && StringUtils.isNumeric(u2)){
+						int iU1= Integer.parseInt(u1);
+						int iU2= Integer.parseInt(u2);
+						if(iU1==iU2){
+							return 0 ;
+						}else if(iU1>iU2){
+							return 1 ;
+						}else{
+							return -1;
+						}
+					}else{
+						return u1.compareTo(u2);
+					}
+				}
+			});
 		 int unModifyCount =0;
 		 int[] taskNums = ScheduleUtil.assignTaskNumber(taskServerList.size(), children.size(), maxNumOfOneServer);
 		 int point =0;
@@ -675,7 +735,25 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType + "/" + taskType + "/" + this.PATH_TaskItem;
 		 int point =0;
 		 List<String> children = this.getZooKeeper().getChildren(zkPath, false);
-		 Collections.sort(children);
+//		 Collections.sort(children);
+//		 20150323 有些任务分片，业务方其实是用数字的字符串排序的。优先以数字进行排序，否则以字符串排序
+		 Collections.sort(children,new Comparator<String>(){
+			 public int compare(String u1, String u2) {
+					if(StringUtils.isNumeric(u1) && StringUtils.isNumeric(u2)){
+						int iU1= Integer.parseInt(u1);
+						int iU2= Integer.parseInt(u2);
+						if(iU1==iU2){
+							return 0 ;
+						}else if(iU1>iU2){
+							return 1 ;
+						}else{
+							return -1;
+						}
+					}else{
+						return u1.compareTo(u2);
+					}
+				}
+			});
 		 int unModifyCount =0;
 		 for(String name:children){
 			byte[] curServerValue = this.getZooKeeper().getData(zkPath + "/" + name + "/cur_server",false,null);
