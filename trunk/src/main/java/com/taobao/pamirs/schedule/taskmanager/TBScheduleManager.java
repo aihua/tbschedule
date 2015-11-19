@@ -111,7 +111,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 		this.currentSerialNumber = serialNumber();
 		this.scheduleCenter = aScheduleCenter;
 		this.taskTypeInfo = this.scheduleCenter.loadTaskTypeBaseInfo(baseTaskType);
-    	
+    	log.info("create TBScheduleManager for taskType:"+baseTaskType);
 		//清除已经过期1天的TASK,OWN_SIGN的组合。超过一天没有活动server的视为过期
 		this.scheduleCenter.clearExpireTaskTypeRunningInfo(baseTaskType,ScheduleUtil.getLocalIP() + "清除过期OWN_SIGN信息",this.taskTypeInfo.getExpireOwnSignInterval());
 		
@@ -337,8 +337,8 @@ abstract class TBScheduleManager implements IStrategyTask {
 	 * @throws Exception 
 	 */
 	public void stop(String strategyName) throws Exception{
-		if(log.isDebugEnabled()){
-			log.debug("停止服务器 ：" + this.currenScheduleServer.getUuid());
+		if(log.isInfoEnabled()){
+			log.info("停止服务器 ：" + this.currenScheduleServer.getUuid());
 		}
 		this.isPauseSchedule = false;
 		if (this.processor != null) {

@@ -174,7 +174,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 				stsInfo = this.getScheduleStrategyManager().loadManagerFactoryInfo(this.getUuid());
 			} catch (Exception e) {
 				isException = true;
-				logger.error(e.getMessage(), e);
+				logger.error("获取服务器信息有误：uuid="+this.getUuid(), e);
 			}
 			if (isException == true) {
 				try {
@@ -236,7 +236,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			}
 			return true;
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error("判断Leader出错：uuif="+uuid, e);
 			return true;
 		}
 	}	
@@ -253,7 +253,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 					try {
 						task.stop(run.getStrategyName());
 					} catch (Throwable e) {
-						logger.error("注销任务错误：" + e.getMessage(), e);
+						logger.error("注销任务错误：strategyName=" + run.getStrategyName(), e);
 					}
 				}
 		   //不足，增加调度器
@@ -282,7 +282,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 					try{
 					  task.stop(strategyName);
 					}catch(Throwable e){
-					  logger.error("注销任务错误："+e.getMessage(),e);
+					  logger.error("注销任务错误：strategyName="+strategyName,e);
 					}
 				}
 				this.managerMap.remove(name);
@@ -294,7 +294,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 					try {
 						task.stop(strategyName);
 					} catch (Throwable e) {
-						logger.error("注销任务错误：" + e.getMessage(), e);
+						logger.error("注销任务错误：strategyName=" + strategyName, e);
 					}
 				}
 				this.managerMap.remove(strategyName);
@@ -331,13 +331,13 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 						zk.close();
 					}
 				} catch (Exception e) {
-					logger.warn("zk getZooKeeper异常！",e);
+					logger.error("stopAll zk getZooKeeper异常！",e);
 				}
 			}
 			this.uuid = null;
-			logger.warn("停止服务成功！");
+			logger.info("stopAll 停止服务成功！");
 		} catch (Throwable e) {
-			logger.error("停止服务失败：" + e.getMessage(), e);
+			logger.error("stopAll 停止服务失败：" + e.getMessage(), e);
 		} finally {
 			lock.unlock();
 		}

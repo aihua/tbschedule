@@ -8,11 +8,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
@@ -156,6 +159,19 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		Stat stat = this.getZooKeeper().setData(zkPath,"reload=true".getBytes(),-1);
 		return stat.getVersion();
 
+    }
+    public Map<String ,Stat> getCurrentServerStatList(String taskType) throws Exception{
+    	Map<String ,Stat> statMap=new HashMap<String ,Stat>();
+    	String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(taskType);
+		String zkPath = this.PATH_BaseTaskType + "/" + baseTaskType 
+		        + "/" + taskType + "/" + this.PATH_Server;
+		List<String> childs=this.getZooKeeper().getChildren(zkPath, false);
+		for(String serv :childs){
+			String singleServ = zkPath + "/" + serv;
+			Stat servStat= this.getZooKeeper().exists(singleServ, false);
+			statMap.put(serv,servStat);
+		}
+    	return statMap;
     }
     public long getReloadTaskItemFlag(String taskType) throws Exception{
     	String baseTaskType = ScheduleUtil.splitBaseTaskTypeFromTaskType(taskType);
@@ -430,7 +446,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 			}
 		});
 		 
-		log.info(taskType+ " current uid="+uuid+" , zk  reloadDealTaskItem");
+		log.debug(taskType+ " current uid="+uuid+" , zk  reloadDealTaskItem");
 		
 		 List<TaskItemDefine> result = new ArrayList<TaskItemDefine>();
 		 for(String name:taskItems){
@@ -443,10 +459,13 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 					item.setParameter(new String(parameterValue));
 				}
 				result.add(item);
+				
+				 
+				 
 			}else if(value != null && uuid.equals(new String(value))==false){
-				log.debug(" current uid="+uuid+" , zk cur_server uid="+new String(value));
+				log.trace(" current uid="+uuid+" , zk cur_server uid="+new String(value));
 			}else  {
-				log.debug(" current uid="+uuid);
+				log.trace(" current uid="+uuid);
 			}
 		 }
 		 return result;
@@ -706,6 +725,8 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		 }	
 		 
 		 if(unModifyCount < children.size()){ //设置需要所有的服务器重新装载任务
+			 log.info("设置需要所有的服务器重新装载任务:updateReloadTaskItemFlag......"+taskType+ "  ,currentUuid "+currentUuid );
+
 			 this.updateReloadTaskItemFlag(taskType);
 		 }
 		 if(log.isDebugEnabled()){
