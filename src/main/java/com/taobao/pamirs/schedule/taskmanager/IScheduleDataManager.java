@@ -1,6 +1,9 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
 import java.util.List;
+import java.util.Map;
+
+import org.apache.zookeeper.data.Stat;
 
 import com.taobao.pamirs.schedule.TaskItemDefine;
 
@@ -224,5 +227,13 @@ public interface IScheduleDataManager{
 	
 	public long updateReloadTaskItemFlag(String taskType) throws Exception;
 	public long getReloadTaskItemFlag(String taskType) throws Exception;
+	
+	/**
+	 * 通过taskType获取当前运行的serverList信息。
+	 * @param taskType
+	 * @return
+	 * @throws Exception
+	 */
+	public Map<String ,Stat> getCurrentServerStatList(String taskType) throws Exception;
 	 
 }

@@ -1,10 +1,13 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.taobao.pamirs.schedule.ScheduleUtil;
 import com.taobao.pamirs.schedule.TaskItemDefine;
 import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
 
@@ -142,6 +145,27 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 	public boolean isNeedReLoadTaskItemList() throws Exception{
 		return this.lastFetchVersion < this.scheduleCenter.getReloadTaskItemFlag(this.currenScheduleServer.getTaskType());
 	}
+	
+	/**判断某个任务对应的线程组是否处于僵尸状态。
+	 * true 表示有线程组处于僵尸状态。需要告警。
+	 * @param type
+	 * @param statMap
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean isExistZombieServ(String type,Map<String,Stat> statMap) throws Exception{
+		boolean exist =false;
+		for(String key:statMap.keySet()){
+			Stat s  = statMap.get(key);
+			if(this.scheduleCenter.getSystemTime() -s.getMtime()>  this.taskTypeInfo.getHeartBeatRate() * 40)
+			{
+				log.error("zombie serverList exists! serv="+key+" ,type="+type +"超过40次心跳周期未更新");
+				exist=true;
+			}
+		}
+		return exist;
+		 
+	}
 	/**
 	 * 根据当前调度服务器的信息，重新计算分配所有的调度任务
 	 * 任务的分配是需要加锁，避免数据分配错误。为了避免数据锁带来的负面作用，通过版本号来达到锁的目的
@@ -203,10 +227,23 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	protected List<TaskItemDefine> getCurrentScheduleTaskItemListNow() throws Exception {
+	//由于上面在数据执行时有使用到synchronized ，但是心跳线程并没有对应加锁。
+	//所以在此方法上加一下synchronized。20151015
+	protected synchronized List<TaskItemDefine> getCurrentScheduleTaskItemListNow() throws Exception {
+		//如果已经稳定了，理论上不需要加载去扫描所有的叶子结点
+		//20151019 by kongxuan.zlj
+		try{
+			Map<String, Stat> statMap= this.scheduleCenter.getCurrentServerStatList(this.currenScheduleServer.getTaskType());
+			//server下面的机器节点的运行时环境是否在刷新，如果
+			isExistZombieServ(this.currenScheduleServer.getTaskType(), statMap);
+		}catch(Exception e ){
+			log.error("zombie serverList exists， Exception:",e);
+		}
+//		
+		
 		//获取最新的版本号
 		this.lastFetchVersion = this.scheduleCenter.getReloadTaskItemFlag(this.currenScheduleServer.getTaskType());
+		log.debug(" this.currenScheduleServer.getTaskType()="+this.currenScheduleServer.getTaskType()+",  need reload="+ isNeedReloadTaskItem);
 		try{
 			//是否被人申请的队列
 			this.scheduleCenter.releaseDealTaskItem(this.currenScheduleServer.getTaskType(), this.currenScheduleServer.getUuid());
@@ -219,13 +256,13 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 			//如果超过10个心跳周期还没有获取到调度队列，则报警
 			if(this.currentTaskItemList.size() ==0 && 
 					scheduleCenter.getSystemTime() - this.lastReloadTaskItemListTime
-					> this.taskTypeInfo.getHeartBeatRate() * 10){
+					> this.taskTypeInfo.getHeartBeatRate() * 20){
 				StringBuffer buf =new StringBuffer();
 				buf.append("调度服务器");
 				buf.append( this.currenScheduleServer.getUuid());
 				buf.append("[TASK_TYPE=");
 				buf.append( this.currenScheduleServer.getTaskType() );
-				buf.append( "]自启动以来，超过10个心跳周期，还 没有获取到分配的任务队列;");
+				buf.append( "]自启动以来，超过20个心跳周期，还 没有获取到分配的任务队列;");
 				buf.append("  currentTaskItemList.size() ="+currentTaskItemList.size());
 				buf.append(" ,scheduleCenter.getSystemTime()="+scheduleCenter.getSystemTime());
 				buf.append(" ,lastReloadTaskItemListTime="+lastReloadTaskItemListTime);

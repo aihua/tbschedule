@@ -88,10 +88,12 @@ public class ScheduleUtil {
 		int[] taskNums = new int[serverNum];
 		int numOfSingle = taskItemNum / serverNum;
 		int otherNum = taskItemNum % serverNum;
-		if (maxNumOfOneServer >0 && numOfSingle >= maxNumOfOneServer) {
-			numOfSingle = maxNumOfOneServer;
-			otherNum = 0;
-		}
+		//20150323 删除, 任务分片保证分配到所有的线程组数上。 开始
+//		if (maxNumOfOneServer >0 && numOfSingle >= maxNumOfOneServer) {
+//			numOfSingle = maxNumOfOneServer;
+//			otherNum = 0;
+//		}
+		//20150323 删除, 任务分片保证分配到所有的线程组数上。 结束
 		for (int i = 0; i < taskNums.length; i++) {
 			if (i < otherNum) {
 				taskNums[i] = numOfSingle + 1;
