@@ -24,11 +24,10 @@ Mavan POM文件：
 2.   调度的Manager可以动态的随意增加和停止。
 3.   可以通过JMX控制调度服务的创建和停止。
 4.   可以指定调度的时间区间：
-
-    `PERMIT_RUN_START_TIME` ：允许执行时段的开始时间crontab的时间格式.以startrun:开始，则表示开机立即启动调度；
-    `PERMIT_RUN_END_TIME` ：允许执行时段的结束时间crontab的时间格式,如果不设置，表示取不到数据就停止；
-    `PERMIT_RUN_START_TIME ='0 * * * * ?'`表示在每分钟的0秒开始；
-    `PERMIT_RUN_START_TIME ='20 * * * * ?'`表示在每分钟的20秒终止，就是每分钟的0-20秒执行，其它时间休眠。
+  - `PERMIT_RUN_START_TIME`：允许执行时段的开始时间crontab的时间格式.以startrun:开始，则表示开机立即启动调度；
+  - `PERMIT_RUN_END_TIME`：允许执行时段的结束时间crontab的时间格式,如果不设置，表示取不到数据就停止；
+  - `PERMIT_RUN_START_TIME ='0 * * * * ?'`表示在每分钟的0秒开始；
+  - `PERMIT_RUN_START_TIME ='20 * * * * ?'`表示在每分钟的20秒终止，就是每分钟的0-20秒执行，其它时间休眠。
 
 ## 2.主要概念
 
@@ -203,4 +202,118 @@ public interface IScheduleTaskDealMulti<T>  extends IScheduleTaskDeal<T> {
   4. 这样就可以保障机器重新启动后，也不会出现问题。可以参考`DBDemoSingle.java`的实现模式。使用的接口应该是`IScheduleTaskDealSingle`。
      如果旺旺的接口支持批量发送消息的时候，才需要使用`IScheduleTaskDealMulti`接口。
 
+## 6.使用步骤
 
+### 6.1.搭建zookeeper集群。
+
+### 6.2.搭建tbschedule控制台。
+修改`src/test/resources/schedule.xml`中的配置信息指向已经启动的zookeeper服务器。为了避免不同应用任务类型间冲突，`rootPath`尽量全局唯一。
+
+```xml
+<bean id="scheduleManagerFactory" class="com.taobao.pamirs.schedule.TBScheduleManagerFactory" init-method="init">
+    <property name="zkConfig">
+        <map>
+            <entry key="zkConnectString" value="your_ip:2181" />
+            <entry key="rootPath" value="/your_app/app1" />
+            <entry key="zkSessionTimeout" value="3000" />
+            <entry key="userName" value="userName" />
+            <entry key="password" value="password" />
+        </map>
+    </property>	
+</bean>
+```
+
+配置Web服务器: 将`console/ScheduleConsole.war`拷贝到你自己的Web服务器中运行即可。因为没有做仔细的兼容性测试，建议使用IE8。
+
+启动浏览器`http://localhost/index.jsp?manager=true`通过Console来检查配置数据是否正确。
+
+### 6.3将自己的应用接入到tbschedule中
+
+#### 添加zookeeper依赖
+```xml
+<dependency>
+    <groupId>org.apache.zookeeper</groupId>
+    <artifactId>zookeeper</artifactId>
+    <version>3.4.6</version>
+</dependency>
+```
+
+#### 添加tbschedule依赖
+```xml
+<dependency>
+    <groupId>com.taobao.pamirs.schedule</groupId>
+    <artifactId>tbschedule</artifactId>
+    <version>3.2.18</version>
+</dependency>
+```
+
+#### 将应用的bean列表加载到`tbscheduleManagerFactory`
+1. 加载zk连接配置；
+2. 新建`ScheduleInitUtil`类，并实现`InitializingBean`, `ApplicationContextAware`；
+3. 将`bean`列表加载至`tbscheduleManagerFactory`；
+```java
+public void afterPropertiesSet() throws Exception {
+    Properties p = getProperties(configInfo);
+    tbscheduleManagerFactory = new TBScheduleManagerFactory();
+    tbscheduleManagerFactory.setApplicationContext(applicationcontext);
+    tbscheduleManagerFactory.init(p);
+    tbscheduleManagerFactory.setZkConfig(convert(p));
+    logger.warn("TBBPM 成功启动schedule调度引擎 ...");
+}
+```
+
+#### 实现自己应用的任务示例
+```java
+@Component("demoTaskBean")
+public class DemoTaskBean  extends IScheduleTaskDealSingle<SubDetailDO>{
+
+  /*实现自己的业务查询*/
+	public List<SubDetailDO> selectTasks(String taskParameter, String ownSign,
+			int taskItemNum, List<TaskItemDefine> taskItemList,
+			int eachFetchDataNum) throws Exception {
+		try { 
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(new Date()); 
+			int day = calendar.get(Calendar.DAY_OF_MONTH);
+			List<SubDetailDO> details = null;
+			
+				details = subDetailDAO.selectForSchedule(
+						getScopeByQueueCondition(taskItemNum, taskItemList),
+						confirmTypes, DETAIL_STATUS_ONE, eachFetchDataNum);
+			return details;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw e;
+		}
+
+	}
+	
+	/*处理自己的业务*/
+	public boolean execute(SubDetailDO subDetail, String ownSign)
+			throws Exception {
+		try {
+			yourProcess.process(subDetail);
+			return true;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e); 
+			return false;
+		}
+	}
+```
+
+#### 向zookeeper添加配置调度任务数据,或者通过控制台添加任务和调度策略
+
+#### 启动调度服务器。
+如果看到类似日志信息，则表示成功：
+
+```
+[2012-01-30 16:50:33,098] [DemoTask$PRE-2-exe0] (DemoTaskBean.java:58) INFO  com.taobao.pamirs.schedule.test.DemoTaskBean - 处理任务[PRE]:39971971893
+[2012-01-30 16:50:33,098] [DemoTask-0-exe0] (DemoTaskBean.java:58) INFO  com.taobao.pamirs.schedule.test.DemoTaskBean - 处理任务[BASE]:79970840269
+[2012-01-30 16:50:33,098] [DemoTask$PRE-3-exe1] (DemoTaskBean.java:58) INFO  com.taobao.pamirs.schedule.test.DemoTaskBean - 处理任务[PRE]:49993262139
+[2012-01-30 16:50:33,114] [DemoTask$TEST-4-exe0] (DemoTaskBean.java:58) INFO  com.taobao.pamirs.schedule.test.DemoTaskBean - 处理任务[TEST]:59954542534
+[2012-01-30 16:50:33,114] [DemoTask$TEST-5-exe1] (DemoTaskBean.java:58) INFO  com.taobao.pamirs.schedule.test.DemoTaskBean - 处理任务[TEST]:70033832131
+[2012-01-30 16:50:33,114] [DemoTask-1-exe1] (DemoTaskBean.java:58) INFO  com.taobao.pamirs.schedule.test.DemoTaskBean - 处理任务[BASE]:90016724177
+```
+
+#### 在Console中检查服务器运行情况。
+可以通过Console来维护调度任务和调度策略的配置。
